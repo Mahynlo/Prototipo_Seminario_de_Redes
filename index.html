@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Seminario de Redes - Prototipo</title>
+
+  <link rel="stylesheet" type="text/css" href="style.css">
+
+  <!-- Librerías de p5.js -->
+  <script src="libraries/p5.min.js"></script>
+  <script src="libraries/p5.sound.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="libraries/p5.serialport.js"></script>
+
+  <!-- Librería de Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+</head>
+
+<body>
+  <h1>Sensores de Humedad y Temperatura</h1>
+  <div class="parent">
+    
+
+<div class="div1" style="text-align: center; margin-bottom: 20px;">
+  <p>
+    🌡️ Temperatura: <span id="temperatura">--</span> °C<br>
+  </p>
+  <p>
+    🥵 Índice de Calor: <span id="indiceCalor">--</span> °C<br>
+  </p>
+  <p>
+    💧 Humedad: <span id="humedad">--</span> %<br>
+  </p>
+  <p>
+    🕒 Última lectura: <span id="ultimaLectura">--</span><br>
+  </p>
+</div>
+
+
+    <div id="contenedor-grafica" class="div2">
+      <h2>Gráfica de Temperatura vs Índice de Calor</h2>
+      <canvas id="grafica"></canvas>
+    </div>
+    <div id="contenedor-grafica2" class="div3">
+      <h2>Gráfica de Humedad</h2>
+      <canvas id="graficaHumedad"></canvas>
+    </div>
+  </div>
+
+  <!-- Script principal -->
+  <script src="sketch.js"></script>
+
+</body>
+
+</html>
