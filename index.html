@@ -1,60 +1,47 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>Seminario de Redes - Prototipo</title>
 
-  <link rel="stylesheet" type="text/css" href="style.css">
+  <link rel="stylesheet" href="style.css">
 
-  <!-- Librerías de p5.js -->
+  <!-- Librerías -->
   <script src="libraries/p5.min.js"></script>
   <script src="libraries/p5.sound.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
   <script src="libraries/p5.serialport.js"></script>
-
-  <!-- Librería de Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-
 </head>
 
 <body>
-  <h1>Sensores de Humedad y Temperatura</h1>
-  <div class="parent">
-    
+  <header>
+    <h1>Sensores de Humedad y Temperatura</h1>
+  </header>
 
-<div class="div1" style="text-align: center; margin-bottom: 20px;">
-  <p>
-    🌡️ Temperatura: <span id="temperatura">--</span> °C<br>
-  </p>
-  <p>
-    🥵 Índice de Calor: <span id="indiceCalor">--</span> °C<br>
-  </p>
-  <p>
-    💧 Humedad: <span id="humedad">--</span> %<br>
-  </p>
-  <p>
-    🕒 Última lectura: <span id="ultimaLectura">--</span><br>
-  </p>
-</div>
+  <main class="dashboard">
+    <section class="info-box">
+      <h3 style="padding: 10px;">📡Información de Sensores</h3>
+      <p>🌡️ <strong>Temperatura:</strong> <span id="temperatura">--</span> °C</p>
+      <p>🥵 <strong>Índice de Calor:</strong> <span id="indiceCalor">--</span> °C</p>
+      <p>💧 <strong>Humedad:</strong> <span id="humedad">--</span> %</p>
+      <p>🕒 <strong>Última lectura:</strong> <span id="ultimaLectura">--</span></p>
+    </section>
 
-
-    <div id="contenedor-grafica" class="div2">
-      <h2>Gráfica de Temperatura vs Índice de Calor</h2>
+    <section class="chart-box">
+      <h2>📊 Temperatura vs Índice de Calor</h2>
       <canvas id="grafica"></canvas>
-    </div>
-    <div id="contenedor-grafica2" class="div3">
-      <h2>Gráfica de Humedad</h2>
+    </section>
+
+    <section class="chart-box">
+      <h2>💦 Gráfica de Humedad</h2>
       <canvas id="graficaHumedad"></canvas>
-    </div>
-  </div>
+    </section>
+  </main>
 
-  <!-- Script principal -->
   <script src="sketch.js"></script>
-
 </body>
 
 </html>

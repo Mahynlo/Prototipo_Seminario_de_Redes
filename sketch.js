@@ -108,7 +108,10 @@ function crearGrafica() {
           pointRadius: 4,
           pointBackgroundColor: 'orange',
           tension: 0.3,
-          fill: false
+          fill: false,
+          font: {
+            size: 16
+          }
         }
       ]
     },
@@ -124,13 +127,19 @@ function crearGrafica() {
           },
           title: {
             display: true,
-            text: '°C'
+            text: '°C',
+            font: {
+              size: 16
+            }
           }
         },
         x: {
           title: {
             display: true,
-            text: 'Hora'
+            text: 'Hora',
+            font: {
+              size: 16
+            }
           }
         }
       },
@@ -158,7 +167,10 @@ function crearGraficaHumedad() {
           pointRadius: 4,
           pointBackgroundColor: 'blue',
           tension: 0.3,
-          fill: false
+          fill: false,
+          font: {
+            size: 16
+          }
         }
       ]
     },
@@ -174,13 +186,19 @@ function crearGraficaHumedad() {
           },
           title: {
             display: true,
-            text: '% Humedad'
+            text: '% Humedad',
+            font: {
+              size: 16
+            }
           }
         },
         x: {
           title: {
             display: true,
-            text: 'Hora'
+            text: 'Hora',
+            font: {
+              size: 16
+            }
           }
         }
       },
