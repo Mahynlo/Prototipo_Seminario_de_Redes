@@ -2,12 +2,15 @@ let socket;
 let humedad = "--";
 let temperatura = "--";
 let indiceCalor = "--";
+let valorLuz = "--";
 
 let chart, humChart;
 let labels = []; //ESTIQUETAS DE LA GRAFICA 
 let tempData = []; // timpo en el eje X
 let calorData = []; // <-- Array para almacenar los datos de temperatura
 let humData = []; // <-- Array para almacenar los datos de humedad
+let luzData = []; // <-- Array para almacenar los datos de luz
+
 
 function setup() {
   createCanvas(400, 300);
@@ -16,11 +19,26 @@ function setup() {
 
   // Conectar al socket
   socket = io();
+
+  socket.on('connect', () => {
+    console.log('🟢 Conectado al servidor Socket.IO con ID:', socket.id);
+  });
+
+
   socket.on('datosSensor', (data) => {
+
+    //console.log('✅ Conectado al servidor Socket.IO');
+    console.log("🔁 Datos recibidos del servidor:", data);
+
     humedad = data.humedad;
     temperatura = data.temperatura;
     indiceCalor = data.indiceCalor;
+    valorLuz = data.valorLuz;
 
+    console.log(data.humedad);
+    console.log(data.temperatura);
+    console.log(data.indiceCalor);
+    console.log(data.valorLuz);
 
     let tiempo = new Date().toLocaleTimeString();
 
@@ -28,6 +46,8 @@ function setup() {
     document.getElementById("temperatura").textContent = temperatura;
     document.getElementById("indiceCalor").textContent = indiceCalor;
     document.getElementById("humedad").textContent = humedad;
+    document.getElementById("valorLuz").textContent = valorLuz;
+
 
     document.getElementById("ultimaLectura").textContent = tiempo;
 
@@ -37,6 +57,8 @@ function setup() {
     tempData.push(parseFloat(temperatura));
     calorData.push(parseFloat(indiceCalor));
     humData.push(parseFloat(humedad)); // Agregar la humedad al array correspondiente
+    luzData.push(parseFloat(valorLuz));
+
 
     // Limitar a los últimos 10 datos
     if (labels.length > 10) {
@@ -44,6 +66,7 @@ function setup() {
       tempData.shift();
       calorData.shift();
       humData.shift(); // Limitar también el array de humedad
+      luzData.shift(); // Limitar también el array de humedad
     }
 
     // Calcular el mínimo y máximo de los datasets
@@ -73,6 +96,11 @@ function setup() {
   // Crear las gráficas
   crearGrafica();
   crearGraficaHumedad();
+
+  //Depuración
+  socket.on('connect_error', (err) => {
+    console.error('❌ Error:', err.message);
+  });
 }
 
 function draw() {
