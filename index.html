@@ -18,7 +18,7 @@
 
 <body>
   <header>
-    <h1>Sensores de Humedad y Temperatura</h1>
+    <h1>Proyecto de Seminario de Redes</h1>
   </header>
 
   <main class="dashboard">
@@ -31,15 +31,22 @@
       <p>🕒 <strong>Última lectura:</strong> <span id="ultimaLectura">--</span></p>
     </section>
 
+    <!-- Grafica Temperatura -->
     <section class="chart-box">
       <h2>📊 Temperatura vs Índice de Calor</h2>
       <canvas id="grafica"></canvas>
     </section>
 
+    <!-- Grafica Humedad -->
     <section class="chart-box">
       <h2>💦 Gráfica de Humedad</h2>
       <canvas id="graficaHumedad"></canvas>
     </section>
+
+    <!-- Grafica Luz -->
+    <section class="chart-box">
+      <h2>💡 Gráfica de Luz</h2>
+      <canvas id="graficaLuz"></canvas>
   </main>
 
   <script src="sketch.js" defer></script>

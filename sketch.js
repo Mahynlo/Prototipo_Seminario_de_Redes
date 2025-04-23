@@ -15,40 +15,40 @@ let luzData = []; // <-- Array para almacenar los datos de luz
 function setup() {
   createCanvas(400, 300);
   textSize(20);
-  textAlign(LEFT, TOP);
+  textAlign(LEFT, TOP); // Alinear texto a la izquierda y arriba
 
   // Conectar al socket
   socket = io();
 
-  socket.on('connect', () => {
+  socket.on('connect', () => { // Conexión exitosa
     console.log('🟢 Conectado al servidor Socket.IO con ID:', socket.id);
   });
 
 
-  socket.on('datosSensor', (data) => {
+  socket.on('datosSensor', (data) => { // Recibir datos del servidor
 
     //console.log('✅ Conectado al servidor Socket.IO');
     console.log("🔁 Datos recibidos del servidor:", data);
 
+    // Actualizar variables globales de los sensores
     humedad = data.humedad;
     temperatura = data.temperatura;
     indiceCalor = data.indiceCalor;
     valorLuz = data.valorLuz;
 
+    // Depuración de datos
     console.log(data.humedad);
     console.log(data.temperatura);
     console.log(data.indiceCalor);
     console.log(data.valorLuz);
 
-    let tiempo = new Date().toLocaleTimeString();
+    let tiempo = new Date().toLocaleTimeString();// // Obtener la hora actual
 
     // Mostrar en HTML
     document.getElementById("temperatura").textContent = temperatura;
     document.getElementById("indiceCalor").textContent = indiceCalor;
     document.getElementById("humedad").textContent = humedad;
     document.getElementById("valorLuz").textContent = valorLuz;
-
-
     document.getElementById("ultimaLectura").textContent = tiempo;
 
 
@@ -83,10 +83,18 @@ function setup() {
     chart.options.scales.y.max = nuevoMax;
 
     // Calcular el rango dinámico para la gráfica de humedad
-    let minHum = Math.floor(Math.min(...humData) / 4) * 4;
-    let maxHum = Math.ceil(Math.max(...humData) / 4) * 4;
+    let minHum = Math.floor(Math.min(...humData) / 5) * 5;
+    let maxHum = Math.ceil(Math.max(...humData) / 5) * 5;
     humChart.options.scales.y.min = minHum;
     humChart.options.scales.y.max = maxHum;
+
+    // Calcular el rango dinámico para la gráfica de luz
+    let minLuz = Math.floor(Math.min(...luzData) / 10) * 10;
+    let maxLuz = Math.ceil(Math.max(...luzData) / 10) * 10;
+    luzChart.options.scales.y.min = minLuz;
+    luzChart.options.scales.y.max = maxLuz;
+
+    luzChart.update();
 
     // Actualizar ambas gráficas
     chart.update();
@@ -96,8 +104,9 @@ function setup() {
   // Crear las gráficas
   crearGrafica();
   crearGraficaHumedad();
+  crearGraficaLuz();
 
-  //Depuración
+  //Depuración de errores de socket
   socket.on('connect_error', (err) => {
     console.error('❌ Error:', err.message);
   });
@@ -238,6 +247,56 @@ function crearGraficaHumedad() {
     }
   });
 }
+
+function crearGraficaLuz() {
+  const ctx = document.getElementById('graficaLuz').getContext('2d');
+  luzChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: '💡 Intensidad de Luz',
+          data: luzData,
+          borderColor: 'gold',
+          borderWidth: 2,
+          pointRadius: 4,
+          pointBackgroundColor: 'gold',
+          tension: 0.3,
+          fill: false
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: 'Intensidad',
+            font: { size: 16 }
+          }
+        },
+        x: {
+          title: {
+            display: true,
+            text: 'Hora',
+            font: { size: 16 }
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          position: 'top'
+        }
+      }
+    }
+  });
+}
+
 
 
 

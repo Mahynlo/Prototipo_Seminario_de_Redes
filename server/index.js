@@ -1,79 +1,91 @@
-// Descripción: Este archivo se encarga de abrir el puerto serie y recibir datos del Arduino. Los datos se procesan y se muestran en la consola.
-
-// Requiere Node.js y la librería 'serialport' para manejar la comunicación serie.
 const { SerialPort } = require('serialport');
-const { ReadlineParser } = require('@serialport/parser-readline');
-
-//Importamos express para crear un servidor web
 const express = require('express');
-const socketIo = require('socket.io'); // Importamos socket.io para la comunicación en tiempo real
-const http = require('http'); // Importamos http para crear un servidor web
-
-//conexión a los datos 
-const app = express();
-const server = http.createServer(app); // Creamos un servidor HTTP
-const io = socketIo(server); // Creamos una instancia de socket.io
-
-let buffer = {
-  humedad: null,
-  temperatura: null,
-  indiceCalor: null,
-  valorLuz: null
-};
-
+const socketIo = require('socket.io');
+const http = require('http');
 const path = require('path');
+
+const app = express();
+const server = http.createServer(app);
+const io = socketIo(server);
+
 app.use(express.static(path.join(__dirname, '..')));
 
+const SERIAL_PATH = 'COM7'; // ⚠️ Asegúrate de que este sea tu puerto
+const BAUD_RATE = 9600;
 
-const mySerialPort = new SerialPort({
-  path: '/dev/ttyUSB0', // Cambia esto al puerto correcto en tu sistema operativo (Windows, Linux o Mac)
-  baudRate: 9600, // Asegúrate de que la velocidad de baudios coincida con la configuración de tu dispositivo
-});
+let mySerialPort;
+let bufferAcumulado = Buffer.alloc(0);
+let reconectando = false;
 
-const parser = mySerialPort.pipe(new ReadlineParser({ delimiter: '\n' })); // Cambia el delimitador si es necesario
+function conectarPuerto() {
+  if (reconectando) return;
 
-mySerialPort.on('open', () => { // Abre el puerto serie
-  console.log('✅ Puerto serie abierto en', mySerialPort.path);
-});
+  mySerialPort = new SerialPort({
+    path: SERIAL_PATH,
+    baudRate: BAUD_RATE,
+    autoOpen: false,
+  });
 
-parser.on('data', (linea) => {
-  const data = linea.trim();
-  console.log('📥 Línea recibida:', data);
+  mySerialPort.open((err) => {
+    if (err) {
+      console.error('❌ No se pudo abrir el puerto:', err.message);
+      return reintentarConexion();
+    }
+    console.log('✅ Puerto serie abierto en', SERIAL_PATH);
+  });
 
-  if (data.includes('Humedad')) {
-    buffer.humedad = data.split(':')[1].trim().replace(' %', '');
-  } else if (data.includes('Temperatura')) {
-    buffer.temperatura = data.split(':')[1].trim().replace(' °C', '');
-  } else if (data.includes('Índice')) {
-    buffer.indiceCalor = data.split(':')[1].trim().replace(' °C', '');
-  } else if (data.includes('Valor de luz')) {
-    buffer.valorLuz = data.split(':')[1].trim();
-  }
+  mySerialPort.on('data', (chunk) => {
+    bufferAcumulado = Buffer.concat([bufferAcumulado, chunk]);
 
-  // Cuando tengamos los tres valores, enviamos
-  if (buffer.humedad && buffer.temperatura && buffer.indiceCalor && buffer.valorLuz) {
-    console.log(`🌡️ Temp: ${buffer.temperatura}°C | 💧 Hum: ${buffer.humedad}% | 🥵 Índice: ${buffer.indiceCalor}°C | 💡 Luz: ${buffer.valorLuz}`);
-    io.emit('datosSensor', { ...buffer });
-    console.log('🛰️ Datos enviados a clientes');
+    while (bufferAcumulado.length >= 16) { // Asegúrate de que el buffer tenga al menos 16 bytes
+      const paquete = bufferAcumulado.slice(0, 16); // Extrae los primeros 16 bytes
+      bufferAcumulado = bufferAcumulado.slice(16); // Elimina los bytes procesados del buffer acumulado
 
-    // Reiniciar buffer
-    buffer = { humedad: null, temperatura: null, indiceCalor: null, valorLuz: null};
-  }
-});
+      // Datos corespondientes a los 16 bytes de la trama de datos
+      const humedad = paquete.readFloatLE(0); // Humedad en % (4 bytes)
+      const temperatura = paquete.readFloatLE(4); // Temperatura en °C (4 bytes)
+      const indiceCalor = paquete.readFloatLE(8); // Índice de calor en °C (4 bytes)
+      const valorLuz = paquete.readFloatLE(12); // Valor de luz en lux (4 bytes)
 
+      console.log(`🌡️ Temp: ${temperatura.toFixed(2)}°C | 💧 Hum: ${humedad.toFixed(2)}% | 🥵 Índice: ${indiceCalor.toFixed(2)}°C | 💡 Luz: ${valorLuz.toFixed(2)}`);
 
-//manejo de errores
-mySerialPort.on('error', (err) => {
-  console.error('❌ Error en el puerto serie:', err.message);
-});
+      io.emit('datosSensor', {
+        humedad: humedad.toFixed(2),
+        temperatura: temperatura.toFixed(2),
+        indiceCalor: indiceCalor.toFixed(2),
+        valorLuz: valorLuz.toFixed(2)
+      });
+    }
+  });
 
-//Depuraión
-io.on('connection_error', (err) => {
+  mySerialPort.on('close', () => { // Evento de cierre del puerto serie
+    console.warn('⚠️ Puerto serie cerrado. Intentando reconectar...');
+    reintentarConexion();
+  });
+
+  mySerialPort.on('error', (err) => { // Evento de error del puerto serie 
+    console.error('❌ Error en el puerto serie:', err.message);
+    reintentarConexion();
+  });
+}
+
+function reintentarConexion() { // Si hay un error o el puerto se cierra, intenta reconectar
+  if (reconectando) return;
+  reconectando = true;
+
+  setTimeout(() => {
+    console.log('🔁 Intentando reconectar al puerto serial...');
+    reconectando = false;
+    conectarPuerto();
+  }, 3000); // Espera 3 segundos antes de reintentar
+}
+
+conectarPuerto();
+
+io.on('connection_error', (err) => { // Manejo de errores de conexión de Socket.IO
   console.log('Error de conexión Socket.IO:', err.message);
 });
 
-
 server.listen(3000, () => { // Inicia el servidor en el puerto 3000
   console.log('🚀 Servidor escuchando en http://localhost:3000');
-}
-);
+});
