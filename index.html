@@ -28,6 +28,7 @@
       <p>🥵 <strong>Índice de Calor:</strong> <span id="indiceCalor">--</span> °C</p>
       <p>💧 <strong>Humedad:</strong> <span id="humedad">--</span> %</p>
       <p>💡 <strong>Luz:</strong> <span id="valorLuz">--</span></p>
+      <p>🪴 <strong>Humedad de Suelo:</strong> <span id="humedadSuelo">--</span></p>
       <p>🕒 <strong>Última lectura:</strong> <span id="ultimaLectura">--</span></p>
     </section>
 
@@ -47,7 +48,15 @@
     <section class="chart-box">
       <h2>💡 Gráfica de Luz</h2>
       <canvas id="graficaLuz"></canvas>
+    </section>
+
+    <!--Grafica de humedad de suelo-->
+    <section class="chart-box">
+      <h2>🪴 Grafica de Humedad del Suelo</h2>
+      <canvas id="graficaSoil"></canvas>
+    </section>
   </main>
+
 
   <script src="sketch.js" defer></script>
 </body>

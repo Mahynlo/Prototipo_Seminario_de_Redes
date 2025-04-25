@@ -3,14 +3,15 @@ let humedad = "--";
 let temperatura = "--";
 let indiceCalor = "--";
 let valorLuz = "--";
+let humedadSuelo = "--";
 
 let chart, humChart;
 let labels = []; //ESTIQUETAS DE LA GRAFICA 
 let tempData = []; // timpo en el eje X
 let calorData = []; // <-- Array para almacenar los datos de temperatura
-let humData = []; // <-- Array para almacenar los datos de humedad
-let luzData = []; // <-- Array para almacenar los datos de luz
-
+let humData = [];   // <-- Array para almacenar los datos de humedad
+let luzData = [];   // <-- Array para almacenar los datos de luz
+let soilData = [];  // <-- Array para almacenar los datos de humedad de suelo
 
 function setup() {
   createCanvas(400, 300);
@@ -35,12 +36,14 @@ function setup() {
     temperatura = data.temperatura;
     indiceCalor = data.indiceCalor;
     valorLuz = data.valorLuz;
+    humedadSuelo = data.humedadSuelo;
 
     // Depuración de datos
     console.log(data.humedad);
     console.log(data.temperatura);
     console.log(data.indiceCalor);
     console.log(data.valorLuz);
+    console.log(data.humedadSuelo);
 
     let tiempo = new Date().toLocaleTimeString();// // Obtener la hora actual
 
@@ -49,6 +52,7 @@ function setup() {
     document.getElementById("indiceCalor").textContent = indiceCalor;
     document.getElementById("humedad").textContent = humedad;
     document.getElementById("valorLuz").textContent = valorLuz;
+    document.getElementById("humedadSuelo").textContent = humedadSuelo;
     document.getElementById("ultimaLectura").textContent = tiempo;
 
 
@@ -58,6 +62,7 @@ function setup() {
     calorData.push(parseFloat(indiceCalor));
     humData.push(parseFloat(humedad)); // Agregar la humedad al array correspondiente
     luzData.push(parseFloat(valorLuz));
+    soilData.push(parseFloat(humedadSuelo));
 
 
     // Limitar a los últimos 10 datos
@@ -67,6 +72,7 @@ function setup() {
       calorData.shift();
       humData.shift(); // Limitar también el array de humedad
       luzData.shift(); // Limitar también el array de humedad
+      soilData.shift();
     }
 
     // Calcular el mínimo y máximo de los datasets
@@ -99,12 +105,15 @@ function setup() {
     // Actualizar ambas gráficas
     chart.update();
     humChart.update();
+
+    soilChart.update();
   });
 
   // Crear las gráficas
   crearGrafica();
   crearGraficaHumedad();
   crearGraficaLuz();
+  crearGraficaSoil();
 
   //Depuración de errores de socket
   socket.on('connect_error', (err) => {
@@ -155,7 +164,7 @@ function crearGrafica() {
     options: {
       responsive: true,
       maintainAspectRatio: false, // permite que se adapte mejor si usas CSS
-      animation: false,
+      animation: true,
       scales: {
         y: {
           beginAtZero: false,
@@ -214,7 +223,7 @@ function crearGraficaHumedad() {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      animation: false,
+      animation: true,
       scales: {
         y: {
           beginAtZero: false,
@@ -270,7 +279,7 @@ function crearGraficaLuz() {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      animation: false,
+      animation: true,
       scales: {
         y: {
           beginAtZero: true,
@@ -297,7 +306,51 @@ function crearGraficaLuz() {
   });
 }
 
-
-
-
-
+function crearGraficaSoil() {
+  const ctx = document.getElementById('graficaSoil').getContext('2d');
+  soilChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: '🪴 Nivel de humedad en el suelo',
+          data: soilData,
+          borderColor: 'brown',
+          borderWidth: 2,
+          pointRadius: 4,
+          pointBackgroundColor: 'brown',
+          tension: 0.3,
+          fill: false
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: true,
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: 'Intensidad',
+            font: { size: 16 }
+          }
+        },
+        x: {
+          title: {
+            display: true,
+            text: 'Hora',
+            font: { size: 16 }
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          position: 'top'
+        }
+      }
+    }
+  });
+}

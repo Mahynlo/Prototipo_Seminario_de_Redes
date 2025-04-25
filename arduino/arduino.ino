@@ -1,68 +1,45 @@
 #include <DHT.h>
 
-// --- Configuraciones ---
-#define DHTPIN 2            // Pin donde está conectado el DHT11
-#define PHOTORES 1          //Pin de la fotoresistencia
-#define DHTTYPE DHT11       // Tipo de sensor
-const unsigned long INTERVALO_LECTURA = 5000; // 1 segundos
+#define DHTPIN 2        // Pin del sensor DHT11
+#define PHOTORES A0     // Pin del fotoresistor
+#define DHTTYPE DHT11
+#define SOIL A1          // Pin del sensor de humedad de suelo
+const unsigned long INTERVALO_LECTURA = 5000;
 
-// --- Inicialización del sensor ---
 DHT dht(DHTPIN, DHTTYPE);
 unsigned long ultimaLectura = 0;
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(9600);  
   dht.begin();
 }
 
 void loop() {
-  unsigned long ahora = millis();
+  unsigned long ahora = millis(); // Obtener el tiempo actual
 
   if (ahora - ultimaLectura >= INTERVALO_LECTURA) {
-    ultimaLectura = ahora;
-    //Lectura del sensor DHT
-    leerSensorDHT();
+    ultimaLectura = ahora; // Actualizar el tiempo de la última lectura
 
-    //Lectura Fotoresistencia
-    lecturaPhotores();
+    // Leer los valores del sensor DHT11 y el fotoresistor
+    float humedad = dht.readHumidity(); 
+    float temperatura = dht.readTemperature();
+    float valorLuz = analogRead(PHOTORES);
+    float humedadSuelo = analogRead(SOIL);
+    float indiceCalor = dht.computeHeatIndex(temperatura, humedad, false);
 
+    if (isnan(humedad) || isnan(temperatura)) {
+      Serial.println("Error en la lectura del sensor DHT");
+      return;
+    } else if (isnan(humedadSuelo)) {
+      Serial.println("Error en la lectura del sensor de humedad");
+      return;
+    }
+
+    // Enviar datos como paquete binario (4 floats = 16 bytes)
+    Serial.write((uint8_t *)&humedad, sizeof(humedad));
+    Serial.write((uint8_t *)&temperatura, sizeof(temperatura));
+    Serial.write((uint8_t *)&indiceCalor, sizeof(indiceCalor));
+    Serial.write((uint8_t *)&valorLuz, sizeof(valorLuz));
+    Serial.write((uint8_t *)&humedadSuelo, sizeof(humedadSuelo));
   }
-}
-
-float lecturaPhotores(){
-  float valorLuz;
-
-  valorLuz = analogRead(PHOTORES);
-  Serial.println("---- Lectura de Fotoresistencia ----");
-  Serial.print("Luminosidad: ");
-  Serial.println(valorLuz);
-  
-  //return valorLuz;
-
-}
-
-float leerSensorDHT() {
-  float humedad = dht.readHumidity();
-  float tempC = dht.readTemperature(); // Solo Celsius
-
-  if (isnan(humedad) || isnan(tempC)) {
-    Serial.println("Error obteniendo los datos del sensor DHT11");
-    return;
-  }
-
-  float indiceCalorC = dht.computeHeatIndex(tempC, humedad, false); // false = Celsius
-
-  Serial.println("----- Lectura de Sensor DHT11 -----");
-  Serial.print("Humedad: ");
-  Serial.print(humedad);
-  Serial.println(" %");
-
-  Serial.print("Temperatura: ");
-  Serial.print(tempC);
-  Serial.println(" °C");
-
-  Serial.print("Índice de Calor: ");
-  Serial.print(indiceCalorC);
-  Serial.println(" °C");
-  //Serial.println("-----------------------------------");
 }
