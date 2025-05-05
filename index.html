@@ -14,6 +14,33 @@
   <script src="/socket.io/socket.io.js"></script>
   <script src="libraries/p5.serialport.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!--Estilo para la tabla-->
+  <style>
+    .data-table {
+      margin: 20px;
+      font-family: sans-serif;
+    }
+
+    .data-table table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .data-table th,
+    .data-table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .data-table th {
+      background-color: #f8f8f8;
+      font-weight: bold;
+    }
+  </style>
+
 </head>
 
 <body>
@@ -55,8 +82,28 @@
       <h2>🪴 Grafica de Humedad del Suelo</h2>
       <canvas id="graficaSoil"></canvas>
     </section>
-  </main>
 
+    <!-- Tabla de registros -->
+    <section class="chart-box">
+      <section class="data-table">
+        <a href="lecturas.html", style="text-align: 'center;';";>Historial de Lecturas</a>
+        <h2>📋 Últimos 50 Registros</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Temperatura (°C)</th>
+              <th>Índice de Calor (°C)</th>
+              <th>Humedad (%)</th>
+              <th>Luz</th>
+              <th>Humedad del Suelo</th>
+            </tr>
+          </thead>
+          <tbody id="tablaDatos"></tbody>
+        </table>
+      </section>
+    </section>
+  </main>
 
   <script src="sketch.js" defer></script>
 </body>

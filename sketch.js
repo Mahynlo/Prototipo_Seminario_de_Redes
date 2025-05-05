@@ -105,8 +105,28 @@ function setup() {
     // Actualizar ambas gráficas
     chart.update();
     humChart.update();
-
     soilChart.update();
+    luzChart.update();
+
+    // Agregar fila a la tabla en tiempo real
+    const fila = document.createElement('tr');
+    fila.innerHTML = `
+      <td>${new Date().toLocaleString()}</td>
+      <td>${data.temperatura}</td>
+      <td>${data.indiceCalor}</td>
+      <td>${data.humedad}</td>
+      <td>${data.valorLuz}</td>
+      <td>${data.humedadSuelo}</td>
+    `;
+    const tabla = document.getElementById('tablaDatos');
+    tabla.prepend(fila);
+
+    // Limitar la tabla a 50 filas
+    while (tabla.rows.length > 10) {
+      tabla.deleteRow(tabla.rows.length - 1);
+    }
+
+
   });
 
   // Crear las gráficas
@@ -115,19 +135,78 @@ function setup() {
   crearGraficaLuz();
   crearGraficaSoil();
 
+  // Carga los últimos datos guardados en la BD
+  cargarDatosDesdeBD(); 
+
   //Depuración de errores de socket
   socket.on('connect_error', (err) => {
     console.error('❌ Error:', err.message);
   });
 }
 
-function draw() {
-  //background(255); // Limpiar el fondo 
-  //fill(0);
-  //text("💧 Humedad: " + humedad + " %", 20, 80);
-  //text("🌡️ Temperatura: " + temperatura + " °C", 20, 120);
-  //text("🥵 Índice de Calor: " + indiceCalor + " °C", 20, 160);
+function cargarDatosDesdeBD() {
+  fetch('/api/datos')
+    .then(res => res.json())
+    .then(datos => {
+      const tabla = document.getElementById('tablaDatos');
+      datos.forEach(data => {
+        const fila = document.createElement('tr');
+        fila.innerHTML = `
+          <td>${new Date(data.timestamp).toLocaleString()}</td>
+          <td>${data.temperatura}</td>
+          <td>${data.indiceCalor}</td>
+          <td>${data.humedad}</td>
+          <td>${data.valorLuz}</td>
+          <td>${data.humedadSuelo}</td>
+        `;
+        tabla.appendChild(fila);
+      });
+
+      datos.forEach(dato => {
+        const hora = new Date(dato.timestamp).toLocaleTimeString();
+
+        labels.push(hora);
+        tempData.push(parseFloat(dato.temperatura));
+        calorData.push(parseFloat(dato.indice_calor));
+        humData.push(parseFloat(dato.humedad));
+        luzData.push(parseFloat(dato.valor_luz));
+        soilData.push(parseFloat(dato.humedad_suelo));
+      });
+
+      // Limitar a los últimos 10
+      while (labels.length > 10) {
+        labels.shift();
+        tempData.shift();
+        calorData.shift();
+        humData.shift();
+        luzData.shift();
+        soilData.shift();
+      }
+
+      // Asignar explícitamente los datos a las gráficas
+      chart.data.labels = labels;
+      chart.data.datasets[0].data = tempData;
+      chart.data.datasets[1].data = calorData;
+
+      humChart.data.labels = labels;
+      humChart.data.datasets[0].data = humData;
+
+      luzChart.data.labels = labels;
+      luzChart.data.datasets[0].data = luzData;
+
+      soilChart.data.labels = labels;
+      soilChart.data.datasets[0].data = soilData;
+
+      // Ahora sí, actualizar
+      chart.update();
+      humChart.update();
+      luzChart.update();
+      soilChart.update();
+    })
+    .catch(err => console.error('❌ Error al cargar datos desde SQLite:', err));
 }
+
+
 
 function crearGrafica() {
   const ctx = document.getElementById('grafica').getContext('2d');

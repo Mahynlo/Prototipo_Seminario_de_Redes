@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seminario de Redes - Prototipo</title>
+
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Librerías -->
+  <script src="libraries/p5.min.js"></script>
+  <script src="libraries/p5.sound.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="libraries/p5.serialport.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!--Estilo para la tabla-->
+  <style>
+    .data-table {
+      margin: 20px;
+      font-family: sans-serif;
+    }
+
+    .data-table table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .data-table th,
+    .data-table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .data-table th {
+      background-color: #f8f8f8;
+      font-weight: bold;
+    }
+  </style>
+
+</head>
+<body>
+  <header>
+    <h1>📜 Historial de Datos de Sensores</h1>
+    <a href="index.html">⬅️ Volver al Dashboard</a>
+  </header>
+
+  <main>
+    <section class="chart-box" style="align-content: center;">
+      <section class="data-table">
+      <table id="tablaHistorial" border="1" style="width: 100%; margin-top: 20px; border-collapse: collapse;">
+        <thead>
+          <tr>
+            <th>Fecha y Hora</th>
+            <th>Temperatura (°C)</th>
+            <th>Índice de Calor (°C)</th>
+            <th>Humedad (%)</th>
+            <th>Valor de Luz</th>
+            <th>Humedad del Suelo</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+    </section>
+  </section>
+  <script>
+    fetch('/api/sensores')
+    .then(res => res.json())
+    .then(datos => {
+      const cuerpoTabla = document.querySelector('#tablaLectura tbody');
+      datos.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${row.id}</td>
+          <td>${row.humedad}</td>
+          <td>${row.temperatura}</td>
+          <td>${row.indice_calor}</td>
+          <td>${row.valor_luz}</td>
+          <td>${row.humedad_suelo}</td>
+          <td>${row.timestamp}</td>
+        `;
+         cuerpoTabla.appendChild(tr);
+      });
+    })
+    .catch(err => {
+    alert("❌ Error al cargar datos");
+    console.error(err);
+    });
+    </script>  
+  </main>
+</body>
+</html>

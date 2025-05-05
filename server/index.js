@@ -4,6 +4,28 @@ const socketIo = require('socket.io');
 const http = require('http');
 const path = require('path');
 
+//Conexion con la base de datos
+const sqlite3 = require('sqlite3').verbose();
+const db = new sqlite3.Database('./sensores.db', (err) => {
+  if (err) {
+    console.error('❌ Error al conectar con SQLite:', err.message);
+  } else {
+    console.log('✅ Conectado a la base de datos SQLite');
+  }
+});
+
+db.run(`
+  CREATE TABLE IF NOT EXISTS datos_sensores (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    humedad REAL,
+    temperatura REAL,
+    indice_calor REAL,
+    valor_luz REAL,
+    humedad_suelo REAL,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
+`);
+
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
@@ -11,7 +33,7 @@ const io = socketIo(server);
 app.use(express.static(path.join(__dirname, '..')));
 
 //const SERIAL_PATH = 'COM7'; // ⚠️ Asegúrate de que este sea tu puerto
-const SERIAL_PATH = '/dev/ttyUSB0'; // ⚠️ puerto en linux
+const SERIAL_PATH = '/dev/ttyUSB0'; //⚠️ puerto en linux
 const BAUD_RATE = 9600;
 
 let mySerialPort;
@@ -58,6 +80,18 @@ function conectarPuerto() {
         valorLuz: valorLuz.toFixed(2),
         humedadSuelo: humedadSuelo.toFixed(2)
       });
+
+      db.run(`
+        INSERT INTO datos_sensores (humedad, temperatura, indice_calor, valor_luz, humedad_suelo)
+        VALUES (?, ?, ?, ?, ?)
+      `, [humedad, temperatura, indiceCalor, valorLuz, humedadSuelo], (err) => {
+        if (err) {
+          console.error('❌ Error al insertar en SQLite:', err.message);
+        } else {
+          console.log('💾 Datos guardados en SQLite');
+        }
+      });
+
     }
   });
 
@@ -87,6 +121,19 @@ conectarPuerto();
 
 io.on('connection_error', (err) => { // Manejo de errores de conexión de Socket.IO
   console.log('Error de conexión Socket.IO:', err.message);
+});
+
+// Agrega esto antes de server.listen(3000, ...)
+
+// Ruta para obtener todos los datos históricos
+app.get('/api/sensores', (req, res) => {
+  db.all('SELECT * FROM datos_sensores ORDER BY timestamp DESC', (err, rows) => {
+    if (err) {
+      console.error('❌ Error al leer datos:', err.message);
+      return res.status(500).json({ error: 'Error al leer datos' });
+    }
+    res.json(rows);
+  });
 });
 
 server.listen(3000, () => { // Inicia el servidor en el puerto 3000
