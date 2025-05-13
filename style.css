@@ -10,13 +10,14 @@ body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: #c5eec8;
   color: #333;
-  padding: 20px;
+  padding: 30px;
 }
 
 /* Encabezado */
 header {
   text-align: center;
   margin-bottom: 30px;
+
 }
 
 h1 {
@@ -70,3 +71,43 @@ canvas {
   width: 100% !important;
   height: 400px !important;
 }
+
+footer {
+  text-align: center;
+  margin-top: 30px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+
+/* Estilo para la barra de navegación */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 250px;
+      height: 100vh;
+      background-color: #2d3748;
+      padding-top: 20px;
+      color: white;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .sidebar a {
+      display: block;
+      padding: 10px 20px;
+      color: white;
+      text-decoration: none;
+      font-size: 16px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+    }
+
+    .sidebar a:hover {
+      background-color: #4a5568;
+    }
+
+    .content {
+      margin-left: 270px;
+      padding: 20px;
+    }

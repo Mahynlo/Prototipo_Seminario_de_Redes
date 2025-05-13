@@ -7,6 +7,8 @@
   <title>Seminario de Redes - Prototipo</title>
 
   <link rel="stylesheet" href="style.css">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
 
   <!-- Librerías -->
   <script src="libraries/p5.min.js"></script>
@@ -39,71 +41,130 @@
       background-color: #f8f8f8;
       font-weight: bold;
     }
+
+    /* Estilo para la barra de navegación */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 250px;
+      height: 100vh;
+      background-color: #2d3748;
+      padding-top: 20px;
+      color: white;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .sidebar a {
+      display: block;
+      padding: 10px 20px;
+      color: white;
+      text-decoration: none;
+      font-size: 16px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+    }
+
+    .sidebar a:hover {
+      background-color: #4a5568;
+    }
+
+    .content {
+      margin-left: 270px;
+      padding: 20px;
+    }
   </style>
 
 </head>
 
-<body>
-  <header>
-    <h1>Proyecto de Seminario de Redes</h1>
+<body class="bg-gray-50 text-gray-800 font-sans">
+  <!-- Barra de navegación lateral -->
+  <div class="sidebar">
+    
+    <h2 class="text-xl font-semibold text-center text-white mb-6">Menú</h2>
+    <label class="text-gray-400 text-sm mt-5 mb-2 pl-2">Navegacion en la aplicacion</label>
+    <a href="index.html">🏠 Dashboard</a>
+    <a href="Configuracion.html">⚙️ Configuración</a>
+    <a href="lecturas.html">📋 Historial de Lecturas</a>
+    <label class="text-gray-400 text-sm mt-5 mb-2 pl-2">Navegación Dashboard</label>
+    <a href="#informacion-sensores">📡 Información de Sensores</a>
+    <a href="#graficas">📊 Gráficas</a>
+    <a href="#historial-registros">📋 Últimos Registros</a>
+   
+  </div>
+
+  <!-- Encabezado -->
+  <header class="bg-blue-700 text-white p-6 text-center shadow-md content">
+    <h1 class="text-4xl font-bold text-gray-300">🌐 Proyecto de Seminario de Redes</h1>
   </header>
 
-  <main class="dashboard">
-    <section class="info-box">
-      <h3 style="padding: 10px;">📡Información de Sensores</h3>
-      <p>🌡️ <strong>Temperatura:</strong> <span id="temperatura">--</span> °C</p>
-      <p>🥵 <strong>Índice de Calor:</strong> <span id="indiceCalor">--</span> °C</p>
-      <p>💧 <strong>Humedad:</strong> <span id="humedad">--</span> %</p>
-      <p>💡 <strong>Luz:</strong> <span id="valorLuz">--</span></p>
-      <p>🪴 <strong>Humedad de Suelo:</strong> <span id="humedadSuelo">--</span></p>
-      <p>🕒 <strong>Última lectura:</strong> <span id="ultimaLectura">--</span></p>
+  <!-- Contenido Principal -->
+  <main class="content">
+
+    <!-- Información de sensores -->
+    <section id="informacion-sensores" class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+      <h2 class="text-xl font-semibold mb-4">📡 Información de Sensores</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <p>🌡️ <strong>Temperatura:</strong> <span id="temperatura">--</span> °C</p>
+        <p>🥵 <strong>Índice de Calor:</strong> <span id="indiceCalor">--</span> °C</p>
+        <p>💧 <strong>Humedad:</strong> <span id="humedad">--</span> %</p>
+        <p>💡 <strong>Luz:</strong> <span id="valorLuz">--</span></p>
+        <p>🪴 <strong>Humedad de Suelo:</strong> <span id="humedadSuelo">--</span></p>
+        <p>🕒 <strong>Última lectura:</strong> <span id="ultimaLectura">--</span></p>
+      </div>
     </section>
 
-    <!-- Grafica Temperatura -->
-    <section class="chart-box">
-      <h2>📊 Temperatura vs Índice de Calor</h2>
-      <canvas id="grafica"></canvas>
+    <!-- Gráficas -->
+    <section id="graficas" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="bg-white p-4 rounded-xl shadow-md">
+        <h2 class="text-lg font-semibold mb-2">📊 Temperatura vs Índice de Calor</h2>
+        <canvas id="grafica"></canvas>
+      </div>
+      <div class="bg-white p-4 rounded-xl shadow-md">
+        <h2 class="text-lg font-semibold mb-2">💦 Gráfica de Humedad</h2>
+        <canvas id="graficaHumedad"></canvas>
+      </div>
+      <div class="bg-white p-4 rounded-xl shadow-md">
+        <h2 class="text-lg font-semibold mb-2">💡 Gráfica de Luz</h2>
+        <canvas id="graficaLuz"></canvas>
+      </div>
+      <div class="bg-white p-4 rounded-xl shadow-md">
+        <h2 class="text-lg font-semibold mb-2">🪴 Gráfica de Humedad del Suelo</h2>
+        <canvas id="graficaSoil"></canvas>
+      </div>
     </section>
 
-    <!-- Grafica Humedad -->
-    <section class="chart-box">
-      <h2>💦 Gráfica de Humedad</h2>
-      <canvas id="graficaHumedad"></canvas>
-    </section>
-
-    <!-- Grafica Luz -->
-    <section class="chart-box">
-      <h2>💡 Gráfica de Luz</h2>
-      <canvas id="graficaLuz"></canvas>
-    </section>
-
-    <!--Grafica de humedad de suelo-->
-    <section class="chart-box">
-      <h2>🪴 Grafica de Humedad del Suelo</h2>
-      <canvas id="graficaSoil"></canvas>
-    </section>
-
-    <!-- Tabla de registros -->
-    <section class="chart-box">
-      <section class="data-table">
-        <a href="lecturas.html", style="text-align: 'center;';";>Historial de Lecturas</a>
-        <h2>📋 Últimos 50 Registros</h2>
-        <table>
-          <thead>
+    <!-- Historial de registros -->
+    <section id="historial-registros" class="bg-white p-6 rounded-xl shadow-md">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold">📋 Últimos 50 Registros</h2>
+        <a href="lecturas.html" class="text-blue-600 hover:text-blue-800 font-medium underline">
+          Ver historial completo
+        </a>
+      </div>
+      <div class="overflow-auto">
+        <table class="min-w-full border border-gray-200 text-sm text-center">
+          <thead class="bg-gray-100">
             <tr>
-              <th>Fecha</th>
-              <th>Temperatura (°C)</th>
-              <th>Índice de Calor (°C)</th>
-              <th>Humedad (%)</th>
-              <th>Luz</th>
-              <th>Humedad del Suelo</th>
+              <th class="px-4 py-2 border">Fecha</th>
+              <th class="px-4 py-2 border">Temperatura (°C)</th>
+              <th class="px-4 py-2 border">Índice de Calor (°C)</th>
+              <th class="px-4 py-2 border">Humedad (%)</th>
+              <th class="px-4 py-2 border">Luz</th>
+              <th class="px-4 py-2 border">Humedad del Suelo</th>
             </tr>
           </thead>
           <tbody id="tablaDatos"></tbody>
         </table>
-      </section>
+      </div>
     </section>
   </main>
+
+  <!-- Footer -->
+  <footer class="bg-gray-800 text-white p-4 text-center mt-6 pl-[20px]">
+    <p>© 2025 Proyecto de Seminario de Redes. Todos los derechos reservados.</p>
+    <p>Desarrollado por el equipo de seminario.</p>
+  </footer>
 
   <script src="sketch.js" defer></script>
 </body>

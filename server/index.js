@@ -32,7 +32,7 @@ const io = socketIo(server);
 
 app.use(express.static(path.join(__dirname, '..')));
 
-const SERIAL_PATH = 'COM5'; // ⚠️ Asegúrate de que este sea tu puerto
+const SERIAL_PATH = 'COM6'; // ⚠️ Asegúrate de que este sea tu puerto
 //const SERIAL_PATH = '/dev/ttyUSB0'; //⚠️ puerto en linux
 const BAUD_RATE = 9600;
 
@@ -58,40 +58,45 @@ function conectarPuerto() {
   });
 
   mySerialPort.on('data', (chunk) => {
-    bufferAcumulado = Buffer.concat([bufferAcumulado, chunk]);
-  
-    while (bufferAcumulado.length >= 20) { // // Asegúrate de que el buffer tenga al menos 20 bytes
-      const paquete = bufferAcumulado.slice(0, 20); // Extrae el paquete de 20 bytes
-      bufferAcumulado = bufferAcumulado.slice(20); // Elimina los bytes procesados del buffer acumulado
-  
-      try {
-        // Datos corespondientes a los 20 bytes de la trama de datos
-        const humedad = paquete.readFloatLE(0); 
-        const temperatura = paquete.readFloatLE(4); 
-        const indiceCalor = paquete.readFloatLE(8);
-        const valorLuz = paquete.readFloatLE(12);
-        const humedadSuelo = paquete.readFloatLE(16);
-  
-        console.log(`🌡️ Temp: ${temperatura.toFixed(2)}°C | 💧 Hum: ${humedad.toFixed(2)}% | 🥵 Índice: ${indiceCalor.toFixed(2)}°C | 💡 Luz: ${valorLuz.toFixed(2)} | 🪴 Humedad suelo : ${humedadSuelo.toFixed(2)}`);
-  
-        io.emit('datosSensor', {
-          humedad: humedad.toFixed(2),
-          temperatura: temperatura.toFixed(2),
-          indiceCalor: indiceCalor.toFixed(2),
-          valorLuz: valorLuz.toFixed(2),
-          humedadSuelo: humedadSuelo.toFixed(2)
-        });
-  
-        db.run(`
-          INSERT INTO datos_sensores (humedad, temperatura, indice_calor, valor_luz, humedad_suelo)
-          VALUES (?, ?, ?, ?, ?)
-        `, [humedad, temperatura, indiceCalor, valorLuz, humedadSuelo]);
-      } catch (error) {
-        console.error('❌ Error procesando paquete:', error.message);
-      }
-    }
-  });
-  
+  bufferAcumulado = Buffer.concat([bufferAcumulado, chunk]);
+
+  while (bufferAcumulado.length >= 18) {
+  const paquete = bufferAcumulado.slice(0, 18);
+  console.log('📦 Paquete recibido:', paquete);
+  bufferAcumulado = bufferAcumulado.slice(18);
+
+  try {
+    const humedad       = paquete.readFloatLE(0);
+    const temperatura   = paquete.readFloatLE(4);
+    const indiceCalor   = paquete.readFloatLE(8);
+    const valorLuz      = paquete.readInt16LE(12);
+    const humedadSuelo  = paquete.readInt16LE(14);
+    const errorCode     = paquete.readInt16LE(16);
+
+    console.log(`🌡️ Temp: ${temperatura.toFixed(2)}°C | 💧 Hum: ${humedad.toFixed(2)}% | 🥵 Índice: ${indiceCalor.toFixed(2)}°C | 💡 Luz: ${valorLuz} | 🪴 Humedad suelo: ${humedadSuelo} | ❗Error: ${errorCode}`);
+
+    io.emit('datosSensor', {
+      humedad: humedad.toFixed(2),
+      temperatura: temperatura.toFixed(2),
+      indiceCalor: indiceCalor.toFixed(2),
+      valorLuz: valorLuz,
+      humedadSuelo: humedadSuelo,
+      errorCode: errorCode
+    });
+
+    db.run(`
+      INSERT INTO datos_sensores (humedad, temperatura, indice_calor, valor_luz, humedad_suelo)
+      VALUES (?, ?, ?, ?, ?)
+    `, [humedad, temperatura, indiceCalor, valorLuz, humedadSuelo]);
+
+  } catch (error) {
+    console.error('❌ Error procesando paquete:', error.message);
+  }
+}
+
+});
+
+
 
   mySerialPort.on('close', () => { // Evento de cierre del puerto serie
     console.warn('⚠️ Puerto serie cerrado. Intentando reconectar...');
