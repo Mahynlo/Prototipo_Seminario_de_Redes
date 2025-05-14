@@ -20,6 +20,7 @@
         <a href="index.html">🏠 Dashboard</a>
         <a href="Configuracion.html">⚙️ Configuración</a>
         <a href="lecturas.html">📋 Historial de Lecturas</a>
+        <a href="alertas.html"> 🔔 Alertas</a>
         <label class="text-gray-400 text-sm mt-5 mb-2 pl-2">Navegación Configuracion</label>
         <a href="#informacion-sensores">Resepcion de datos</a>
         <a href="#graficas">Graficas</a>
@@ -37,6 +38,15 @@
     <p>© 2025 Proyecto de Seminario de Redes. Todos los derechos reservados.</p>
     <p>Desarrollado por el equipo de seminario.</p>
   </footer>
+
+  
+  <script>
+  fetch('./componenetes/toast.html')
+    .then(res => res.text())
+    .then(html => {
+      document.body.insertAdjacentHTML('beforeend', html);
+    });
+</script>
 
 </body>
 

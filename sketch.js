@@ -1,3 +1,4 @@
+// sketch.js
 let socket;
 let humedad = "--";
 let temperatura = "--";
@@ -28,106 +29,114 @@ function setup() {
 
   socket.on('datosSensor', (data) => { // Recibir datos del servidor
 
-    //console.log('✅ Conectado al servidor Socket.IO');
     console.log("🔁 Datos recibidos del servidor:", data);
 
-    // Actualizar variables globales de los sensores
-    humedad = data.humedad;
-    temperatura = data.temperatura;
-    indiceCalor = data.indiceCalor;
-    valorLuz = data.valorLuz;
-    humedadSuelo = data.humedadSuelo;
+    // Verificar errores enviados por el Arduino
+    if (data.errorCode === 1) {
+        mostrarToastError("❌ Error en el sensor de humedad y temperatura. No está enviando datos o está desconectado.");
+        
+    } else if (data.errorCode === 2) {
+        mostrarToastError("❌ Error en el sensor de luz. No está dando valores esperados.");
+        
+    } else if (data.errorCode === 3) {
+        mostrarToastError("❌ Error en el sensor de humedad del suelo. No está dando valores esperados.");
+     
+    } else {
+        // No hay error, procesar los datos recibidos
+        humedad = data.humedad;
+        temperatura = data.temperatura;
+        indiceCalor = data.indiceCalor;
+        valorLuz = data.valorLuz;
+        humedadSuelo = data.humedadSuelo;
 
-    // Depuración de datos
-    console.log(data.humedad);
-    console.log(data.temperatura);
-    console.log(data.indiceCalor);
-    console.log(data.valorLuz);
-    console.log(data.humedadSuelo);
+        // Depuración de datos
+        console.log(data.humedad);
+        console.log(data.temperatura);
+        console.log(data.indiceCalor);
+        console.log(data.valorLuz);
+        console.log(data.humedadSuelo);
 
-    let tiempo = new Date().toLocaleTimeString();// // Obtener la hora actual
+        let tiempo = new Date().toLocaleTimeString(); // Obtener la hora actual
 
-    // Mostrar en HTML
-    document.getElementById("temperatura").textContent = temperatura;
-    document.getElementById("indiceCalor").textContent = indiceCalor;
-    document.getElementById("humedad").textContent = humedad;
-    document.getElementById("valorLuz").textContent = valorLuz;
-    document.getElementById("humedadSuelo").textContent = humedadSuelo;
-    document.getElementById("ultimaLectura").textContent = tiempo;
+        // Mostrar en HTML
+        document.getElementById("temperatura").textContent = temperatura;
+        document.getElementById("indiceCalor").textContent = indiceCalor;
+        document.getElementById("humedad").textContent = humedad;
+        document.getElementById("valorLuz").textContent = valorLuz;
+        document.getElementById("humedadSuelo").textContent = humedadSuelo;
+        document.getElementById("ultimaLectura").textContent = tiempo;
 
+        // Actualizar datos para la gráfica
+        labels.push(tiempo);
+        tempData.push(parseFloat(temperatura));
+        calorData.push(parseFloat(indiceCalor));
+        humData.push(parseFloat(humedad)); // Agregar la humedad al array correspondiente
+        luzData.push(parseFloat(valorLuz));
+        soilData.push(parseFloat(humedadSuelo));
 
-    // Actualizar datos para la gráfica
-    labels.push(tiempo);
-    tempData.push(parseFloat(temperatura));
-    calorData.push(parseFloat(indiceCalor));
-    humData.push(parseFloat(humedad)); // Agregar la humedad al array correspondiente
-    luzData.push(parseFloat(valorLuz));
-    soilData.push(parseFloat(humedadSuelo));
+        // Limitar a los últimos 10 datos
+        if (labels.length > 10) {
+            labels.shift();
+            tempData.shift();
+            calorData.shift();
+            humData.shift(); // Limitar también el array de humedad
+            luzData.shift(); // Limitar también el array de luz
+            soilData.shift();
+        }
 
+        // Calcular el mínimo y máximo de los datasets
+        let todosLosValores = tempData.concat(calorData);
+        let min = Math.min(...todosLosValores);
+        let max = Math.max(...todosLosValores);
 
-    // Limitar a los últimos 10 datos
-    if (labels.length > 10) {
-      labels.shift();
-      tempData.shift();
-      calorData.shift();
-      humData.shift(); // Limitar también el array de humedad
-      luzData.shift(); // Limitar también el array de humedad
-      soilData.shift();
+        // Ajustar a múltiplos de 3 hacia abajo y hacia arriba
+        let nuevoMin = Math.floor(min / 3) * 3;
+        let nuevoMax = Math.ceil(max / 3) * 3;
+
+        // Actualizar el rango del eje Y de la gráfica de temperatura
+        chart.options.scales.y.min = nuevoMin;
+        chart.options.scales.y.max = nuevoMax;
+
+        // Calcular el rango dinámico para la gráfica de humedad
+        let minHum = Math.floor(Math.min(...humData) / 5) * 5;
+        let maxHum = Math.ceil(Math.max(...humData) / 5) * 5;
+        humChart.options.scales.y.min = minHum;
+        humChart.options.scales.y.max = maxHum;
+
+        // Calcular el rango dinámico para la gráfica de luz
+        let minLuz = Math.floor(Math.min(...luzData) / 10) * 10;
+        let maxLuz = Math.ceil(Math.max(...luzData) / 10) * 10;
+        luzChart.options.scales.y.min = minLuz;
+        luzChart.options.scales.y.max = maxLuz;
+
+        luzChart.update();
+
+        // Actualizar ambas gráficas
+        chart.update();
+        humChart.update();
+        soilChart.update();
+        luzChart.update();
+
+        // Agregar fila a la tabla en tiempo real
+        const fila = document.createElement('tr');
+        fila.innerHTML = `
+          <td>${new Date().toLocaleString()}</td>
+          <td>${data.temperatura}</td>
+          <td>${data.indiceCalor}</td>
+          <td>${data.humedad}</td>
+          <td>${data.valorLuz}</td>
+          <td>${data.humedadSuelo}</td>
+        `;
+        const tabla = document.getElementById('tablaDatos');
+        tabla.prepend(fila);
+
+        // Limitar la tabla a 50 filas
+        while (tabla.rows.length > 10) {
+          tabla.deleteRow(tabla.rows.length - 1);
+        }
     }
-
-    // Calcular el mínimo y máximo de los datasets
-    let todosLosValores = tempData.concat(calorData);
-    let min = Math.min(...todosLosValores);
-    let max = Math.max(...todosLosValores);
-
-    // Ajustar a múltiplos de 3 hacia abajo y hacia arriba
-    let nuevoMin = Math.floor(min / 3) * 3;
-    let nuevoMax = Math.ceil(max / 3) * 3;
-
-    // Actualizar el rango del eje Y de la gráfica de temperatura
-    chart.options.scales.y.min = nuevoMin;
-    chart.options.scales.y.max = nuevoMax;
-
-    // Calcular el rango dinámico para la gráfica de humedad
-    let minHum = Math.floor(Math.min(...humData) / 5) * 5;
-    let maxHum = Math.ceil(Math.max(...humData) / 5) * 5;
-    humChart.options.scales.y.min = minHum;
-    humChart.options.scales.y.max = maxHum;
-
-    // Calcular el rango dinámico para la gráfica de luz
-    let minLuz = Math.floor(Math.min(...luzData) / 10) * 10;
-    let maxLuz = Math.ceil(Math.max(...luzData) / 10) * 10;
-    luzChart.options.scales.y.min = minLuz;
-    luzChart.options.scales.y.max = maxLuz;
-
-    luzChart.update();
-
-    // Actualizar ambas gráficas
-    chart.update();
-    humChart.update();
-    soilChart.update();
-    luzChart.update();
-
-    // Agregar fila a la tabla en tiempo real
-    const fila = document.createElement('tr');
-    fila.innerHTML = `
-      <td>${new Date().toLocaleString()}</td>
-      <td>${data.temperatura}</td>
-      <td>${data.indiceCalor}</td>
-      <td>${data.humedad}</td>
-      <td>${data.valorLuz}</td>
-      <td>${data.humedadSuelo}</td>
-    `;
-    const tabla = document.getElementById('tablaDatos');
-    tabla.prepend(fila);
-
-    // Limitar la tabla a 50 filas
-    while (tabla.rows.length > 10) {
-      tabla.deleteRow(tabla.rows.length - 1);
-    }
-
-
   });
+
 
   // Crear las gráficas
   crearGrafica();
@@ -137,12 +146,32 @@ function setup() {
 
   // Carga los últimos datos guardados en la BD
   cargarDatosDesdeBD(); 
+cargarHistorialAlertas(); // Cargar historial de alertas
 
   //Depuración de errores de socket
   socket.on('connect_error', (err) => {
     console.error('❌ Error:', err.message);
   });
 }
+
+function mostrarToastError(mensaje) {
+  const contenedor = document.getElementById('toastContainer');
+  if (!contenedor) return;
+
+  const alerta = document.createElement('div');
+  alerta.className = 'toast-alert';
+  alerta.textContent = mensaje;
+
+  contenedor.appendChild(alerta);
+
+  // Eliminar la alerta después de 4 segundos
+  setTimeout(() => {
+    alerta.remove();
+  }, 4000);
+}
+
+
+
 
 function cargarDatosDesdeBD() {
   fetch('/api/datos')
@@ -206,6 +235,24 @@ function cargarDatosDesdeBD() {
     .catch(err => console.error('❌ Error al cargar datos desde SQLite:', err));
 }
 
+function cargarHistorialAlertas() {
+  fetch('/api/alertas')
+    .then(res => res.json())
+    .then(alertas => {
+      const tabla = document.getElementById('tablaAlertas').querySelector('tbody');
+      tabla.innerHTML = ''; // Limpiar contenido anterior
+      alertas.forEach(alerta => {
+        const fila = document.createElement('tr');
+        fila.innerHTML = `
+          <td>${new Date(alerta.timestamp).toLocaleString()}</td>
+          <td>${alerta.tipo || 'No especificado'}</td>
+          <td>${alerta.mensaje}</td>
+        `;
+        tabla.appendChild(fila);
+      });
+    })
+    .catch(err => console.error('❌ Error al cargar historial de alertas:', err));
+}
 
 
 function crearGrafica() {

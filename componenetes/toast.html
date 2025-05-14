@@ -1,0 +1,24 @@
+<!-- toast.html -->
+<div id="toastContainer" style="position: fixed; top: 20px; right: 20px; z-index: 9999;">
+  <!-- Aquí se insertarán las alertas -->
+</div>
+
+<style>
+  .toast-alert {
+    background-color: #dc3545; /* Rojo para errores */
+    color: white;
+    padding: 12px 16px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    animation: fadeInOut 4s ease-in-out forwards;
+    font-family: sans-serif;
+  }
+
+  @keyframes fadeInOut {
+    0% { opacity: 0; transform: translateY(-20px); }
+    10% { opacity: 1; transform: translateY(0); }
+    90% { opacity: 1; }
+    100% { opacity: 0; transform: translateY(-20px); }
+  }
+</style>

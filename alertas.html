@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Alertas</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+
+
+
+    <!-- Librerías -->
+    <script src="libraries/p5.min.js"></script>
+    <script src="libraries/p5.sound.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="libraries/p5.serialport.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+
+<body class="bg-gray-50 text-gray-800 font-sans">
+    <!-- Barra de navegación lateral -->
+  
+
+    <div class="sidebar">
+
+        <h2 class="text-xl font-semibold text-center text-white mb-6">Menú</h2>
+        <label class="text-gray-400 text-sm mt-5 mb-2 pl-2">Navegacion en la aplicacion</label>
+        <a href="index.html">🏠 Dashboard</a>
+        <a href="Configuracion.html">⚙️ Configuración</a>
+        <a href="lecturas.html">📋 Historial de Lecturas</a>
+        <a href="alertas.html"> 🔔 Alertas</a>
+        
+
+    </div>
+
+    <!-- Encabezado -->
+    <header class="bg-blue-700 text-white p-6 text-center shadow-md ml-64">
+        <h1 class="text-4xl font-bold text-gray-300">🔔 Alertas</h1>
+    </header>
+
+    <!-- Contenido principal -->
+    <main class="ml-64 p-6">
+      
+
+        <h1>🔔 Últimas Alertas</h1>
+        <h2 class="text-2xl font-semibold mb-4">Listado de Alertas</h2>
+        <div class="overflow-x-auto">
+            <table id="tablaAlertas" class="min-w-full bg-white shadow-md rounded mt-4">
+                <thead class="bg-blue-700 text-white">
+                    <tr>
+                        <th scope="col" class="py-2 px-4 text-left">Fecha</th>
+                        <th scope="col" class="py-2 px-4 text-left">Tipo de Alerta</th>
+                        <th scope="col" class="py-2 px-4 text-left">Mensaje</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Datos JS aquí -->
+                </tbody>
+            </table>
+        </div>
+
+
+
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white p-4 text-center mt-6 ml-64">
+        <p>© 2025 Proyecto de Seminario de Redes. Todos los derechos reservados.</p>
+        <p>Desarrollado por el equipo de seminario.</p>
+    </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            fetch("http://localhost:3000/api/alertas")
+                .then(res => res.json())
+                .then(data => {
+                    const tbody = document.querySelector('#tablaAlertas tbody');
+                    tbody.innerHTML = ""; // limpiar por si acaso
+                    data.forEach(alerta => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+          <td class="py-2 px-4">${new Date(alerta.fecha).toLocaleString()}</td>
+          <td class="py-2 px-4">${alerta.sensor}</td>
+          <td class="py-2 px-4">${alerta.mensaje}</td>
+        `;
+                        tbody.appendChild(row);
+                    });
+                })
+                .catch(err => {
+                    console.error("❌ Error al obtener alertas:", err);
+                });
+        });
+    </script>
+
+
+</body>
+
+</html>

@@ -75,6 +75,8 @@
     }
   </style>
 
+
+
 </head>
 
 <body class="bg-gray-50 text-gray-800 font-sans">
@@ -86,6 +88,7 @@
     <a href="index.html">🏠 Dashboard</a>
     <a href="Configuracion.html">⚙️ Configuración</a>
     <a href="lecturas.html">📋 Historial de Lecturas</a>
+    <a href="alertas.html"> 🔔 Alertas</a>
     <label class="text-gray-400 text-sm mt-5 mb-2 pl-2">Navegación Dashboard</label>
     <a href="#informacion-sensores">📡 Información de Sensores</a>
     <a href="#graficas">📊 Gráficas</a>
@@ -97,6 +100,8 @@
   <header class="bg-blue-700 text-white p-6 text-center shadow-md content">
     <h1 class="text-4xl font-bold text-gray-300">🌐 Proyecto de Seminario de Redes</h1>
   </header>
+
+
 
   <!-- Contenido Principal -->
   <main class="content">
@@ -167,6 +172,15 @@
   </footer>
 
   <script src="sketch.js" defer></script>
+
+  <script>
+  fetch('./componenetes/toast.html')
+    .then(res => res.text())
+    .then(html => {
+      document.body.insertAdjacentHTML('beforeend', html);
+    });
+</script>
+
 </body>
 
 </html>

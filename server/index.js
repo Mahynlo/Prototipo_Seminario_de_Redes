@@ -1,126 +1,24 @@
-const { SerialPort } = require('serialport');
+// server/index.js
 const express = require('express');
 const socketIo = require('socket.io');
 const http = require('http');
 const path = require('path');
 
-//Conexion con la base de datos
-const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('./sensores.db', (err) => {
-  if (err) {
-    console.error('❌ Error al conectar con SQLite:', err.message);
-  } else {
-    console.log('✅ Conectado a la base de datos SQLite');
-  }
-});
-
-db.run(`
-  CREATE TABLE IF NOT EXISTS datos_sensores (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    humedad REAL,
-    temperatura REAL,
-    indice_calor REAL,
-    valor_luz REAL,
-    humedad_suelo REAL,
-    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-  )
-`);
+// db/sensorData.js
+const db = require('../db/database');
+// 👉 Importar conectarPuerto
+const { conectarPuerto } = require('./serial'); // Ajusta la ruta si está en otro lado
 
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
 
-app.use(express.static(path.join(__dirname, '..')));
-
-const SERIAL_PATH = 'COM6'; // ⚠️ Asegúrate de que este sea tu puerto
-//const SERIAL_PATH = '/dev/ttyUSB0'; //⚠️ puerto en linux
-const BAUD_RATE = 9600;
-
-let mySerialPort;
-let bufferAcumulado = Buffer.alloc(0);
-let reconectando = false;
-
-function conectarPuerto() {
-  if (reconectando) return;
-
-  mySerialPort = new SerialPort({
-    path: SERIAL_PATH,
-    baudRate: BAUD_RATE,
-    autoOpen: false,
-  });
-
-  mySerialPort.open((err) => {
-    if (err) {
-      console.error('❌ No se pudo abrir el puerto:', err.message);
-      return reintentarConexion();
-    }
-    console.log('✅ Puerto serie abierto en', SERIAL_PATH);
-  });
-
-  mySerialPort.on('data', (chunk) => {
-  bufferAcumulado = Buffer.concat([bufferAcumulado, chunk]);
-
-  while (bufferAcumulado.length >= 18) {
-  const paquete = bufferAcumulado.slice(0, 18);
-  console.log('📦 Paquete recibido:', paquete);
-  bufferAcumulado = bufferAcumulado.slice(18);
-
-  try {
-    const humedad       = paquete.readFloatLE(0);
-    const temperatura   = paquete.readFloatLE(4);
-    const indiceCalor   = paquete.readFloatLE(8);
-    const valorLuz      = paquete.readInt16LE(12);
-    const humedadSuelo  = paquete.readInt16LE(14);
-    const errorCode     = paquete.readInt16LE(16);
-
-    console.log(`🌡️ Temp: ${temperatura.toFixed(2)}°C | 💧 Hum: ${humedad.toFixed(2)}% | 🥵 Índice: ${indiceCalor.toFixed(2)}°C | 💡 Luz: ${valorLuz} | 🪴 Humedad suelo: ${humedadSuelo} | ❗Error: ${errorCode}`);
-
-    io.emit('datosSensor', {
-      humedad: humedad.toFixed(2),
-      temperatura: temperatura.toFixed(2),
-      indiceCalor: indiceCalor.toFixed(2),
-      valorLuz: valorLuz,
-      humedadSuelo: humedadSuelo,
-      errorCode: errorCode
-    });
-
-    db.run(`
-      INSERT INTO datos_sensores (humedad, temperatura, indice_calor, valor_luz, humedad_suelo)
-      VALUES (?, ?, ?, ?, ?)
-    `, [humedad, temperatura, indiceCalor, valorLuz, humedadSuelo]);
-
-  } catch (error) {
-    console.error('❌ Error procesando paquete:', error.message);
-  }
-}
-
-});
+app.use(express.static(path.join(__dirname, '..'))); // Servir archivos estáticos desde la raíz del proyecto
+app.use(express.json()); // Middleware para parsear JSON
+app.use(express.urlencoded({ extended: true })); // Middleware para parsear URL-encoded
 
 
-
-  mySerialPort.on('close', () => { // Evento de cierre del puerto serie
-    console.warn('⚠️ Puerto serie cerrado. Intentando reconectar...');
-    reintentarConexion();
-  });
-
-  mySerialPort.on('error', (err) => { // Evento de error del puerto serie 
-    console.error('❌ Error en el puerto serie:', err.message);
-    reintentarConexion();
-  });
-}
-
-function reintentarConexion() { // Si hay un error o el puerto se cierra, intenta reconectar
-  if (reconectando) return;
-  reconectando = true;
-
-  setTimeout(() => {
-    console.log('🔁 Intentando reconectar al puerto serial...');
-    reconectando = false;
-    conectarPuerto();
-  }, 3000); // Espera 3 segundos antes de reintentar
-}
-
-conectarPuerto();
+conectarPuerto(io); // Conectar al puerto serie
 
 io.on('connection_error', (err) => { // Manejo de errores de conexión de Socket.IO
   console.log('Error de conexión Socket.IO:', err.message);
@@ -138,6 +36,18 @@ app.get('/api/sensores', (req, res) => {
     res.json(rows);
   });
 });
+
+// 👉 Ruta para obtener historial de alertas
+app.get('/api/alertas', (req, res) => {
+  db.all('SELECT * FROM alertas ORDER BY id DESC', (err, rows) => {
+    if (err) {
+      console.error('❌ Error al consultar alertas:', err.message);
+      return res.status(500).json({ error: 'Error al consultar alertas' });
+    }
+    res.json(rows);
+  });
+});
+
 
 server.listen(3000, () => { // Inicia el servidor en el puerto 3000
   console.log('🚀 Servidor escuchando en http://localhost:3000');

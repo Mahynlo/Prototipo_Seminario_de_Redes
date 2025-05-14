@@ -5,7 +5,7 @@
 #define DHTPIN 2
 #define PHOTORES A0
 #define DHTTYPE DHT11
-#define SOIL A1
+#define SOIL A1 
 #define TX_PIN 9
 #define BUZZER_PIN 8
 #define LED_VERDE 6
