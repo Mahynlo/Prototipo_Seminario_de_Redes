@@ -125,9 +125,12 @@ function setup() {
     while (tabla.rows.length > 10) {
       tabla.deleteRow(tabla.rows.length - 1);
     }
-
-
   });
+
+  socket.on('errorSensor', (data) => {
+    alert(data.mensaje);
+  });
+
 
   // Crear las gráficas
   crearGrafica();

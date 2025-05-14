@@ -12,7 +12,7 @@ void loop() {
   uint8_t buflen = VW_MAX_MESSAGE_LEN;
 
   if (vw_get_message(buf, &buflen)) {
-    if (buflen == 20) {
+    if (buflen == 24) {
       // Enviar directamente el buffer binario al puerto serial
       Serial.write(buf, buflen);
     }

@@ -41,5 +41,6 @@ void loop() {
     Serial.write((uint8_t *)&indiceCalor, sizeof(indiceCalor));
     Serial.write((uint8_t *)&valorLuz, sizeof(valorLuz));
     Serial.write((uint8_t *)&humedadSuelo, sizeof(humedadSuelo));
+    
   }
 }
