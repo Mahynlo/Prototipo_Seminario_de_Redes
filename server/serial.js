@@ -43,6 +43,7 @@ function conectarPuerto(io) {
                 const valorLuz = paquete.readInt16LE(12);
                 const humedadSuelo = paquete.readInt16LE(14);
                 const errorCode = paquete.readInt16LE(16);
+                
 
                 console.log(`🌡️ Temp: ${temperatura.toFixed(2)}°C | 💧 Hum: ${humedad.toFixed(2)}% | 🥵 Índice: ${indiceCalor.toFixed(2)}°C | 💡 Luz: ${valorLuz} | 🪴 Humedad suelo: ${humedadSuelo} | ❗Error: ${errorCode}`);
 

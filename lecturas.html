@@ -8,7 +8,6 @@
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="style.css">
-
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans">
 
@@ -19,58 +18,58 @@
     <a href="index.html">🏠 Dashboard</a>
     <a href="Configuracion.html">⚙️ Configuración</a>
     <a href="lecturas.html">📋 Historial de Lecturas</a>
-    <label class="text-gray-400 text-sm mt-5 mb-2 pl-2">Navegación Configuracion</label>
-    <a href="#informacion-sensores">Resepcion de datos</a>
-    <a href="#graficas">Graficas</a>
-    <a href="#historial-registros">Alertas</a>
+    
   </div>
 
-  <!-- Encabezado -->
-  <header class="bg-blue-700 text-white p-6 text-center shadow-md content">
-    <h1 class="text-3xl font-bold text-gray-300">📋 Historial de Datos</h1>
-  </header>
+  <!-- Contenido principal -->
+  <div class="ml-64 min-h-screen">
+    <!-- Encabezado -->
+    <header class="bg-blue-700 text-white rounded-xl shadow-md py-6 px-4 text-center mb-6">
+      <h1 class="text-3xl font-bold">📋 Historial de Datos</h1>
+    </header>
 
-  <main class="max-w-7xl mx-auto mt-8 px-4">
-    <!-- Filtro por fechas -->
-    <div class="bg-white p-4 rounded-xl shadow mb-6">
-      <h2 class="text-xl font-semibold mb-4">🔎 Filtrar por Fecha</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Desde</label>
-          <input type="date" id="fechaInicio" class="mt-1 w-full border rounded-lg p-2" />
+    <main class="max-w-7xl mx-auto mt-8 px-4 pb-10">
+      <!-- Filtro por fechas -->
+      <section class="bg-white p-6 rounded-xl shadow mb-8">
+        <h2 class="text-xl font-semibold mb-4">🔎 Filtrar por Fecha</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
+          <div>
+            <label for="fechaInicio" class="block text-sm font-medium text-gray-700">Desde</label>
+            <input type="date" id="fechaInicio" class="mt-1 w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+          <div>
+            <label for="fechaFin" class="block text-sm font-medium text-gray-700">Hasta</label>
+            <input type="date" id="fechaFin" class="mt-1 w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+          <div>
+            <button onclick="filtrarPorFecha()" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">Buscar</button>
+          </div>
         </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Hasta</label>
-          <input type="date" id="fechaFin" class="mt-1 w-full border rounded-lg p-2" />
-        </div>
-        <div>
-          <button onclick="filtrarPorFecha()" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">Buscar</button>
-        </div>
-      </div>
-    </div>
+      </section>
 
-    <!-- Tabla de historial -->
-    <div class="bg-white p-4 rounded-xl shadow">
-      <h2 class="text-xl font-semibold mb-4">📈 Registros</h2>
-      <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200 text-sm text-center" id="tablaLectura">
-          <thead class="bg-gray-100">
-            <tr>
-              <th class="px-4 py-2">Fecha y Hora</th>
-              <th class="px-4 py-2">Temperatura (°C)</th>
-              <th class="px-4 py-2">Índice de Calor (°C)</th>
-              <th class="px-4 py-2">Humedad (%)</th>
-              <th class="px-4 py-2">Valor de Luz</th>
-              <th class="px-4 py-2">Humedad del Suelo</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-100" id="tablaCuerpo">
-            <!-- Datos se cargan aquí -->
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </main>
+      <!-- Tabla de historial -->
+      <section class="bg-white p-6 rounded-xl shadow">
+        <h2 class="text-xl font-semibold mb-4">📈 Registros</h2>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200 text-sm text-center" id="tablaLectura">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="px-4 py-2">Fecha y Hora</th>
+                <th class="px-4 py-2">Temperatura (°C)</th>
+                <th class="px-4 py-2">Índice de Calor (°C)</th>
+                <th class="px-4 py-2">Humedad (%)</th>
+                <th class="px-4 py-2">Valor de Luz</th>
+                <th class="px-4 py-2">Humedad del Suelo</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100" id="tablaCuerpo">
+              <!-- Datos cargados dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
 
   <script>
     async function cargarDatos(fechaInicio = '', fechaFin = '') {
@@ -85,7 +84,7 @@
         const datos = await res.json();
 
         const cuerpoTabla = document.getElementById('tablaCuerpo');
-        cuerpoTabla.innerHTML = ''; // Limpiar tabla
+        cuerpoTabla.innerHTML = '';
 
         datos.forEach(row => {
           const tr = document.createElement('tr');
@@ -120,3 +119,4 @@
   </script>
 </body>
 </html>
+
