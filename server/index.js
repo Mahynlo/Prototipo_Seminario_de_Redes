@@ -48,6 +48,63 @@ app.get('/api/alertas', (req, res) => {
   });
 });
 
+// 👉 Ruta para obtener historial de plantas
+app.post('/plantas', (req, res) => {
+  const {
+    nombre,
+    humedad_min,
+    humedad_max,
+    temperatura_min,
+    temperatura_max,
+    nivel_luz,
+    humedad_suelo_min,
+    humedad_suelo_max
+  } = req.body;
+
+  const query = `
+    INSERT INTO plantas (
+      nombre, humedad_min, humedad_max, temperatura_min, temperatura_max,
+      nivel_luz, humedad_suelo_min, humedad_suelo_max
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  db.run(query, [
+    nombre,
+    humedad_min,
+    humedad_max,
+    temperatura_min,
+    temperatura_max,
+    nivel_luz,
+    humedad_suelo_min,
+    humedad_suelo_max
+  ], function(err) {
+    if (err) {
+      console.error('❌ Error al insertar planta:', err.message);
+      res.status(500).json({ error: 'Error al guardar la planta' });
+    } else {
+      console.log(`✅ Planta guardada con ID ${this.lastID}`);
+      res.status(201).json({ message: 'Planta guardada correctamente', id: this.lastID });
+    }
+  });
+});
+
+//HACER FETCH A LA ULTIMA FILA
+app.get('/plantas/ultima', (req, res) => {
+  db.get('SELECT * FROM plantas ORDER BY id DESC LIMIT 1', (err, row) => {
+    if (err) {
+      console.error('❌ Error al obtener la última planta:', err.message);
+      return res.status(500).json({ error: 'Error al consultar la base de datos' });
+    }
+    if (!row) {
+      return res.status(404).json({ error: 'No hay plantas registradas' });
+    }
+    res.json(row);
+  });
+});
+
+
+//******************************************************************************************************
 
 server.listen(3000, () => { // Inicia el servidor en el puerto 3000
   console.log('🚀 Servidor escuchando en http://localhost:3000');

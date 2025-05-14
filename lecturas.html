@@ -3,93 +3,120 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Seminario de Redes - Prototipo</title>
+  <title>📋 Historial de Datos</title>
 
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="style.css">
 
-  <!-- Librerías -->
-  <script src="libraries/p5.min.js"></script>
-  <script src="libraries/p5.sound.min.js"></script>
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="libraries/p5.serialport.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <!--Estilo para la tabla-->
-  <style>
-    .data-table {
-      margin: 20px;
-      font-family: sans-serif;
-    }
-
-    .data-table table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    .data-table th,
-    .data-table td {
-      border: 1px solid #ddd;
-      padding: 8px;
-      text-align: center;
-      font-size: 14px;
-    }
-
-    .data-table th {
-      background-color: #f8f8f8;
-      font-weight: bold;
-    }
-  </style>
-
 </head>
-<body>
-  <header>
-    <h1>📜 Historial de Datos de Sensores</h1>
-    <a href="index.html">⬅️ Volver al Dashboard</a>
+<body class="bg-gray-50 text-gray-800 font-sans">
+
+  <!-- Barra de navegación lateral -->
+  <div class="sidebar">
+    <h2 class="text-xl font-semibold text-center text-white mb-6">Menú</h2>
+    <label class="text-gray-400 text-sm mt-5 mb-2 pl-2">Navegacion en la aplicacion</label>
+    <a href="index.html">🏠 Dashboard</a>
+    <a href="Configuracion.html">⚙️ Configuración</a>
+    <a href="lecturas.html">📋 Historial de Lecturas</a>
+    <label class="text-gray-400 text-sm mt-5 mb-2 pl-2">Navegación Configuracion</label>
+    <a href="#informacion-sensores">Resepcion de datos</a>
+    <a href="#graficas">Graficas</a>
+    <a href="#historial-registros">Alertas</a>
+  </div>
+
+  <!-- Encabezado -->
+  <header class="bg-blue-700 text-white p-6 text-center shadow-md content">
+    <h1 class="text-3xl font-bold text-gray-300">📋 Historial de Datos</h1>
   </header>
 
-  <main>
-    <section class="chart-box" style="align-content: center;">
-      <section class="data-table">
-      <table id="tablaHistorial" border="1" style="width: 100%; margin-top: 20px; border-collapse: collapse;">
-        <thead>
-          <tr>
-            <th>Fecha y Hora</th>
-            <th>Temperatura (°C)</th>
-            <th>Índice de Calor (°C)</th>
-            <th>Humedad (%)</th>
-            <th>Valor de Luz</th>
-            <th>Humedad del Suelo</th>
-          </tr>
-        </thead>
-        <tbody>
-        </tbody>
-      </table>
-    </section>
-  </section>
-  <script>
-    fetch('/api/sensores')
-    .then(res => res.json())
-    .then(datos => {
-      const cuerpoTabla = document.querySelector('#tablaLectura tbody');
-      datos.forEach(row => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${row.id}</td>
-          <td>${row.humedad}</td>
-          <td>${row.temperatura}</td>
-          <td>${row.indice_calor}</td>
-          <td>${row.valor_luz}</td>
-          <td>${row.humedad_suelo}</td>
-          <td>${row.timestamp}</td>
-        `;
-         cuerpoTabla.appendChild(tr);
-      });
-    })
-    .catch(err => {
-    alert("❌ Error al cargar datos");
-    console.error(err);
-    });
-    </script>  
+  <main class="max-w-7xl mx-auto mt-8 px-4">
+    <!-- Filtro por fechas -->
+    <div class="bg-white p-4 rounded-xl shadow mb-6">
+      <h2 class="text-xl font-semibold mb-4">🔎 Filtrar por Fecha</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Desde</label>
+          <input type="date" id="fechaInicio" class="mt-1 w-full border rounded-lg p-2" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Hasta</label>
+          <input type="date" id="fechaFin" class="mt-1 w-full border rounded-lg p-2" />
+        </div>
+        <div>
+          <button onclick="filtrarPorFecha()" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">Buscar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla de historial -->
+    <div class="bg-white p-4 rounded-xl shadow">
+      <h2 class="text-xl font-semibold mb-4">📈 Registros</h2>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200 text-sm text-center" id="tablaLectura">
+          <thead class="bg-gray-100">
+            <tr>
+              <th class="px-4 py-2">Fecha y Hora</th>
+              <th class="px-4 py-2">Temperatura (°C)</th>
+              <th class="px-4 py-2">Índice de Calor (°C)</th>
+              <th class="px-4 py-2">Humedad (%)</th>
+              <th class="px-4 py-2">Valor de Luz</th>
+              <th class="px-4 py-2">Humedad del Suelo</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100" id="tablaCuerpo">
+            <!-- Datos se cargan aquí -->
+          </tbody>
+        </table>
+      </div>
+    </div>
   </main>
+
+  <script>
+    async function cargarDatos(fechaInicio = '', fechaFin = '') {
+      try {
+        let url = '/api/sensores';
+        if (fechaInicio && fechaFin) {
+          url += `?desde=${fechaInicio}&hasta=${fechaFin}`;
+        }
+
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('Error al obtener datos');
+        const datos = await res.json();
+
+        const cuerpoTabla = document.getElementById('tablaCuerpo');
+        cuerpoTabla.innerHTML = ''; // Limpiar tabla
+
+        datos.forEach(row => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td class="px-4 py-2">${row.timestamp}</td>
+            <td class="px-4 py-2">${row.temperatura}</td>
+            <td class="px-4 py-2">${row.indice_calor}</td>
+            <td class="px-4 py-2">${row.humedad}</td>
+            <td class="px-4 py-2">${row.valor_luz}</td>
+            <td class="px-4 py-2">${row.humedad_suelo}</td>
+          `;
+          cuerpoTabla.appendChild(tr);
+        });
+      } catch (err) {
+        alert("❌ Error al cargar datos");
+        console.error(err);
+      }
+    }
+
+    function filtrarPorFecha() {
+      const desde = document.getElementById('fechaInicio').value;
+      const hasta = document.getElementById('fechaFin').value;
+
+      if (desde && hasta) {
+        cargarDatos(desde, hasta);
+      } else {
+        alert("⚠️ Por favor selecciona ambas fechas.");
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => cargarDatos());
+  </script>
 </body>
 </html>

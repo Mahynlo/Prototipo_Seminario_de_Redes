@@ -34,5 +34,21 @@ db.run(`
   )
 `);
 
+// crear tabla de plantas si no existe
+db.run(`
+  CREATE TABLE IF NOT EXISTS plantas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT NOT NULL,
+    humedad_min REAL,
+    humedad_max REAL,
+    temperatura_min REAL,
+    temperatura_max REAL,
+    nivel_luz TEXT,
+    humedad_suelo_min REAL,
+    humedad_suelo_max REAL,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
+`);
+
 module.exports = db;
 
