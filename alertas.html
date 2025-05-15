@@ -22,7 +22,7 @@
 
 <body class="bg-gray-50 text-gray-800 font-sans">
     <!-- Barra de navegación lateral -->
-  
+
 
     <div class="sidebar">
 
@@ -32,7 +32,7 @@
         <a href="Configuracion.html">⚙️ Configuración</a>
         <a href="lecturas.html">📋 Historial de Lecturas</a>
         <a href="alertas.html"> 🔔 Alertas</a>
-        
+
 
     </div>
 
@@ -43,10 +43,32 @@
 
     <!-- Contenido principal -->
     <main class="ml-64 p-6">
-      
+
 
         <h1>🔔 Últimas Alertas</h1>
         <h2 class="text-2xl font-semibold mb-4">Listado de Alertas</h2>
+        <div class="mb-4 flex flex-col lg:flex-row justify-between items-center">
+            <label for="tipoAlerta" class="font-semibold mr-2">Selecciona tipo de alerta:</label>
+            <select id="tipoAlerta" class="border px-2 py-1 rounded">
+                <option value="arduino">Arduino</option>
+                <option value="planta">Planta</option>
+            </select>
+            <div class="flex flex-wrap gap-4 mb-4">
+                <div>
+                    <label for="fechaDesde" class="font-semibold mr-2">Desde:</label>
+                    <input type="date" id="fechaDesde" class="border px-2 py-1 rounded">
+                </div>
+                <div>
+                    <label for="fechaHasta" class="font-semibold mr-2">Hasta:</label>
+                    <input type="date" id="fechaHasta" class="border px-2 py-1 rounded">
+                </div>
+                <button id="btnBuscar" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow">
+                    Buscar
+                </button>
+            </div>
+
+        </div>
+
         <div class="overflow-x-auto">
             <table id="tablaAlertas" class="min-w-full bg-white shadow-md rounded mt-4">
                 <thead class="bg-blue-700 text-white">
@@ -74,28 +96,75 @@
     </footer>
 
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            fetch("http://localhost:3000/api/alertas")
-                .then(res => res.json())
-                .then(data => {
-                    const tbody = document.querySelector('#tablaAlertas tbody');
-                    tbody.innerHTML = ""; // limpiar por si acaso
-                    data.forEach(alerta => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-          <td class="py-2 px-4">${new Date(alerta.fecha).toLocaleString()}</td>
-          <td class="py-2 px-4">${alerta.sensor}</td>
-          <td class="py-2 px-4">${alerta.mensaje}</td>
-        `;
-                        tbody.appendChild(row);
-                    });
-                })
-                .catch(err => {
-                    console.error("❌ Error al obtener alertas:", err);
+        async function cargarAlertas(tipo = "arduino", desde = "", hasta = "") {
+            try {
+                let url = `/api/alertasApp?tipo=${tipo}`;
+                if (desde && hasta) {
+                    url += `&desde=${desde}&hasta=${hasta}`;
+                }
+
+                const res = await fetch(url);
+                const data = await res.json();
+                const tbody = document.querySelector('#tablaAlertas tbody');
+                tbody.innerHTML = "";
+
+                data.forEach(alerta => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+        <td class="py-2 px-4">${new Date(alerta.fecha).toLocaleString()}</td>
+        <td class="py-2 px-4">${alerta.sensor || alerta.planta || 'N/A'}</td>
+        <td class="py-2 px-4">${alerta.mensaje || alerta.mensajes || 'N/A'}</td>
+      `;
+                    tbody.appendChild(row);
                 });
+            } catch (err) {
+                console.error("❌ Error al obtener alertas:", err);
+            }
+        }
+
+        const btnBuscar = document.getElementById("btnBuscar");
+        const selectTipo = document.getElementById("tipoAlerta");
+        const inputDesde = document.getElementById("fechaDesde");
+        const inputHasta = document.getElementById("fechaHasta");
+
+        cargarAlertas(selectTipo.value); // carga inicial
+
+        selectTipo.addEventListener("change", () => {
+            cargarAlertas(selectTipo.value, inputDesde.value, inputHasta.value);
+        });
+
+        btnBuscar.addEventListener("click", () => {
+            cargarAlertas(selectTipo.value, inputDesde.value, inputHasta.value);
+        });
+
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const selectTipo = document.getElementById("tipoAlerta");
+            cargarAlertas(selectTipo.value); // carga inicial
+
+            selectTipo.addEventListener("change", () => {
+                cargarAlertas(selectTipo.value);
+            });
         });
     </script>
 
+
+    <script src="sketch.js" defer></script>
+
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const links = document.querySelectorAll(".sidebar a");
+            const currentPage = location.pathname.split("/").pop();
+
+            links.forEach(link => {
+                const linkPage = link.getAttribute("href");
+                if (linkPage === currentPage) {
+                    link.classList.add("active");
+                }
+            });
+        });
+    </script>
 
 </body>
 

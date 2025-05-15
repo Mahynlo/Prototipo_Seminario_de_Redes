@@ -113,8 +113,8 @@
         <p>🌡️ <strong>Temperatura:</strong> <span id="temperatura">--</span> °C</p>
         <p>🥵 <strong>Índice de Calor:</strong> <span id="indiceCalor">--</span> °C</p>
         <p>💧 <strong>Humedad:</strong> <span id="humedad">--</span> %</p>
-        <p>💡 <strong>Luz:</strong> <span id="valorLuz">--</span></p>
-        <p>🪴 <strong>Humedad de Suelo:</strong> <span id="humedadSuelo">--</span></p>
+        <p>💡 <strong>Luz:</strong> <span id="valorLuz">--</span> %</p>
+        <p>🪴 <strong>Humedad de Suelo:</strong> <span id="humedadSuelo">--</span> %</p>
         <p>🕒 <strong>Última lectura:</strong> <span id="ultimaLectura">--</span></p>
       </div>
     </section>
@@ -180,6 +180,21 @@
       document.body.insertAdjacentHTML('beforeend', html);
     });
 </script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const links = document.querySelectorAll(".sidebar a");
+    const currentPage = location.pathname.split("/").pop();
+
+    links.forEach(link => {
+      const linkPage = link.getAttribute("href");
+      if (linkPage === currentPage) {
+        link.classList.add("active");
+      }
+    });
+  });
+</script>
+
 
 </body>
 

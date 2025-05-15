@@ -18,6 +18,7 @@
     <a href="index.html">🏠 Dashboard</a>
     <a href="Configuracion.html">⚙️ Configuración</a>
     <a href="lecturas.html">📋 Historial de Lecturas</a>
+    <a href="alertas.html"> 🔔 Alertas</a>
     
   </div>
 
@@ -58,8 +59,8 @@
                 <th class="px-4 py-2">Temperatura (°C)</th>
                 <th class="px-4 py-2">Índice de Calor (°C)</th>
                 <th class="px-4 py-2">Humedad (%)</th>
-                <th class="px-4 py-2">Valor de Luz</th>
-                <th class="px-4 py-2">Humedad del Suelo</th>
+                <th class="px-4 py-2">Valor de Luz (%)</th>
+                <th class="px-4 py-2">Humedad del Suelo (%)</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100" id="tablaCuerpo">
@@ -117,6 +118,23 @@
 
     window.addEventListener('DOMContentLoaded', () => cargarDatos());
   </script>
+
+  <script src="sketch.js" defer></script>
+
+
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const links = document.querySelectorAll(".sidebar a");
+    const currentPage = location.pathname.split("/").pop();
+
+    links.forEach(link => {
+      const linkPage = link.getAttribute("href");
+      if (linkPage === currentPage) {
+        link.classList.add("active");
+      }
+    });
+  });
+</script>
 </body>
 </html>
 

@@ -57,7 +57,7 @@ h2 {
 
 /* Caja de gráficas */
 .chart-box {
-  background-color:#e5e6e7;
+  background-color: #e5e6e7;
   padding: 20px;
   width: 100%;
   max-width: 600px;
@@ -81,53 +81,76 @@ footer {
 
 
 /* Estilo para la barra de navegación */
-    .sidebar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 250px;
-      height: 100vh;
-      background-color: #2d3748;
-      padding-top: 20px;
-      color: white;
-      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-    }
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 250px;
+  height: 100vh;
+  background-color: #2d3748;
+  padding-top: 20px;
+  color: white;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
 
-    .sidebar a {
-      display: block;
-      padding: 10px 20px;
-      color: white;
-      text-decoration: none;
-      font-size: 16px;
-      margin-bottom: 10px;
-      border-radius: 5px;
-    }
+.sidebar a {
+  display: block;
+  padding: 10px 20px;
+  color: white;
+  text-decoration: none;
+  font-size: 16px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+}
 
-    .sidebar a:hover {
-      background-color: #4a5568;
-    }
+.sidebar a:hover {
+  background-color: #4a5568;
+}
 
-    .content {
-      margin-left: 270px;
-      padding: 20px;
-    }
+.content {
+  margin-left: 270px;
+  padding: 20px;
+}
 
 
-    /*Estilo toast */
-       .toast-alert {
-    background-color: #dc3545; /* Rojo para errores */
-    color: white;
-    padding: 12px 16px;
-    margin-bottom: 10px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-    animation: fadeInOut 4s ease-in-out forwards;
-    font-family: sans-serif;
+/*Estilo toast */
+.toast-alert {
+  background-color: #dc3545;
+  /* Rojo para errores */
+  color: white;
+  padding: 12px 16px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  animation: fadeInOut 4s ease-in-out forwards;
+  font-family: sans-serif;
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
   }
 
-  @keyframes fadeInOut {
-    0% { opacity: 0; transform: translateY(-20px); }
-    10% { opacity: 1; transform: translateY(0); }
-    90% { opacity: 1; }
-    100% { opacity: 0; transform: translateY(-20px); }
+  10% {
+    opacity: 1;
+    transform: translateY(0);
   }
+
+  90% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+
+.sidebar a.active {
+  background-color: #1D4ED8;
+  /* Azul Tailwind */
+  color: white;
+  font-weight: bold;
+}

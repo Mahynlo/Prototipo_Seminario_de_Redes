@@ -1,16 +1,7 @@
 // lectura.js
-const sqlite3 = require('sqlite3').verbose();
-
-// Conecta a la base de datos
-const db = new sqlite3.Database('./sensores.db', (err) => {
-  if (err) {
-    return console.error('❌ Error al conectar con SQLite:', err.message);
-  }
-  console.log('✅ Conectado a la base de datos SQLite');
-});
-
+const db = require('../db/database'); // Importar la base de datos
 // Consulta y muestra todos los datos
-db.all('SELECT * FROM datos_sensores ORDER BY timestamp DESC', (err, rows) => {
+db.all('SELECT * FROM datos_sensores ORDER BY timestamp DESC LIMIT 10', (err, rows) => {
   if (err) {
     return console.error('❌ Error al leer datos:', err.message);
   }

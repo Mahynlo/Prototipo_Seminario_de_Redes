@@ -46,15 +46,16 @@ function setup() {
         humedad = data.humedad;
         temperatura = data.temperatura;
         indiceCalor = data.indiceCalor;
-        valorLuz = data.valorLuz;
-        humedadSuelo = data.humedadSuelo;
+        valorLuz = ((data.valorLuz / 1023) * 100).toFixed(1);
+        humedadSuelo = (((1023 - data.humedadSuelo) / 1023) * 100).toFixed(1);
+
 
         // Depuración de datos
         console.log(data.humedad);
         console.log(data.temperatura);
         console.log(data.indiceCalor);
-        console.log(data.valorLuz);
-        console.log(data.humedadSuelo);
+        console.log(((data.valorLuz / 1023) * 100).toFixed(1));
+        console.log((((1023 - data.humedadSuelo) / 1023) * 100).toFixed(1));
 
         let tiempo = new Date().toLocaleTimeString(); // Obtener la hora actual
 
@@ -146,7 +147,7 @@ function setup() {
 
   // Carga los últimos datos guardados en la BD
   cargarDatosDesdeBD(); 
-cargarHistorialAlertas(); // Cargar historial de alertas
+  cargarHistorialAlertas(); // Cargar historial de alertas
 
   //Depuración de errores de socket
   socket.on('connect_error', (err) => {
@@ -213,7 +214,7 @@ function cargarDatosDesdeBD() {
       }
 
       // Asignar explícitamente los datos a las gráficas
-      chart.data.labels = labels;
+      chart.data.labels = labels; 
       chart.data.datasets[0].data = tempData;
       chart.data.datasets[1].data = calorData;
 
@@ -434,6 +435,7 @@ function crearGraficaLuz() {
 
 function crearGraficaSoil() {
   const ctx = document.getElementById('graficaSoil').getContext('2d');
+  
   soilChart = new Chart(ctx, {
     type: 'line',
     data: {

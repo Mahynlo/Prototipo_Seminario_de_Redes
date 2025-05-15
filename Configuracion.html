@@ -27,10 +27,7 @@
         <a href="Configuracion.html">⚙️ Configuración</a>
         <a href="lecturas.html">📋 Historial de Lecturas</a>
         <a href="alertas.html"> 🔔 Alertas</a>
-        <label class="text-gray-400 text-sm mt-5 mb-2 pl-2">Navegación Configuracion</label>
-        <a href="#informacion-sensores">Resepcion de datos</a>
-        <a href="#graficas">Graficas</a>
-        <a href="#historial-registros">Alertas</a>
+        
     </div>
 
         
@@ -110,16 +107,16 @@
     <script>
       async function cargarUltimaPlanta() {
         try {
-          const res = await fetch('plantas/ultima');
+          const res = await fetch('/api/plantas/ultima');
           if (!res.ok) throw new Error('No se pudo obtener la planta');
           const planta = await res.json();
 
-          document.getElementById('infoPlanta').innerText = `
-    Nombre: ${planta.nombre}
-    | Humedad: ${planta.humedad_min}% - ${planta.humedad_max}%
-    | Temperatura: ${planta.temperatura_min}°C - ${planta.temperatura_max}°C
-    | Luz: ${planta.nivel_luz}
-    | Suelo: ${planta.humedad_suelo_min} - ${planta.humedad_suelo_max}`;
+          document.getElementById('infoPlanta').innerText = `Nombre: ${planta.nombre}\n
+          Humedad: ${planta.humedad_min} - ${planta.humedad_max}%\n
+          Temperatura: ${planta.temperatura_min} - ${planta.temperatura_max}°C\n
+          Luz: ${planta.nivel_luz}\n
+          Humedad suelo: ${planta.humedad_suelo_min} - ${planta.humedad_suelo_max}%`;
+
         } catch (err) {
           console.error('Error cargando planta:', err.message);
           document.getElementById('infoPlanta').innerText = '❌ No se pudo cargar la planta';
@@ -135,7 +132,7 @@
         const formData = new FormData(e.target);
         const data = Object.fromEntries(formData.entries());
 
-        const response = await fetch('plantas', {
+        const response = await fetch('/api/plantas', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
@@ -154,13 +151,28 @@
 
 </body>
 
-
+<script src="sketch.js" defer></script>
   <script>
   fetch('./componenetes/toast.html')
     .then(res => res.text())
     .then(html => {
       document.body.insertAdjacentHTML('beforeend', html);
     });
+</script>
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const links = document.querySelectorAll(".sidebar a");
+    const currentPage = location.pathname.split("/").pop();
+
+    links.forEach(link => {
+      const linkPage = link.getAttribute("href");
+      if (linkPage === currentPage) {
+        link.classList.add("active");
+      }
+    });
+  });
 </script>
 </html>
 

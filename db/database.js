@@ -1,3 +1,4 @@
+//db/database.js
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
@@ -26,7 +27,7 @@ db.run(`
 
 // Crear tabla de alertas si no existe
 db.run(`
-  CREATE TABLE IF NOT EXISTS alertas (
+  CREATE TABLE IF NOT EXISTS alertasArduino (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     sensor TEXT,
     mensaje TEXT,
@@ -48,6 +49,16 @@ db.run(`
     humedad_suelo_max REAL,
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
   )
+`);
+
+db.run(`
+  CREATE TABLE  IF NOT EXISTS alertasPlanta (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  planta TEXT,
+  fecha TEXT,
+  mensajes TEXT
+);
+
 `);
 
 module.exports = db;
