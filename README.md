@@ -1,15 +1,19 @@
 # Proyecto de Seminario de Redes
 
-## Pa que jale
+## Instalacion de dependencias
 
-1. Instalar las dependencias
+1. Comando Instalar las dependencias
 
    ```bash
    npm install
    ```
 
-2. Correr el server
+2. Comando Correr el server
 
    ```bash
     npm start
    ```
+
+Circuito 
+
+![Circuito del proyecto](./public/assets/imagenes/image.png)
