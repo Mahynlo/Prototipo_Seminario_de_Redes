@@ -109,11 +109,12 @@ function conectarPuerto(io) {
                     const lectura = {
                         humedad: humedad,
                         temperatura: temperatura,
-                        humedad_suelo: humedadSuelo,
-                        luz: valorLuz
+                        humedad_suelo:humedadSueloPorcentaje ,
+                        luz: valorLuzPorcentaje
                     };
 
                     const alertasGeneradas = generarAlertas(lectura, planta);
+
 
                     if (alertasGeneradas.length > 0) {
                         const mensajes = alertasGeneradas.join(' | ');
@@ -183,6 +184,9 @@ function reintentarConexion(io) { // Función para reintentar la conexión al pu
 function generarAlertas(lectura, planta) {
     const alertas = [];
 
+    //console.log('📦 Paquete recibido:', lectura);
+    //console.log('🌱 Planta:', planta);
+
     if (lectura.humedad < planta.humedad_min)
         alertas.push('⚠️ Humedad del aire demasiado baja.');
     else if (lectura.humedad > planta.humedad_max)
@@ -198,11 +202,11 @@ function generarAlertas(lectura, planta) {
     else if (lectura.humedad_suelo > planta.humedad_suelo_max)
         alertas.push('⚠️ Humedad del suelo muy alta.');
 
-    if (planta.nivel_luz === 'sombra' && lectura.luz > 340)
+    if (planta.nivel_luz === 'sombra' && lectura.luz > (34/1023) * 100)
         alertas.push('🌞 Demasiada luz para una planta de sombra.');
-    if (planta.nivel_luz === 'indirecta' && (lectura.luz < 341 || lectura.luz > 682))
+    if (planta.nivel_luz === 'indirecta' && (lectura.luz < ((341/1023)*100) || lectura.luz > ((682/1023)*100) ))
         alertas.push('🌥️ Luz no adecuada para esta planta.');
-    if (planta.nivel_luz === 'directa' && lectura.luz < 683)
+    if (planta.nivel_luz === 'directa' && lectura.luz < ((683/1023)*100))
         alertas.push('☀️ Falta luz directa.');
 
     return alertas;
