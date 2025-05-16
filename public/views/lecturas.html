@@ -7,7 +7,20 @@
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="../style.css">
+
+  <!-- Librerías -->
+  <script src="/libraries/p5.min.js"></script>
+  <script src="/libraries/p5.sound.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/libraries/p5.serialport.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Toastify CSS -->
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+  <!-- Toastify JS -->
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans">
 
@@ -15,19 +28,21 @@
   <div class="sidebar">
     <h2 class="text-xl font-semibold text-center text-white mb-6">Menú</h2>
     <label class="text-gray-400 text-sm mt-5 mb-2 pl-2">Navegacion en la aplicacion</label>
-    <a href="index.html">🏠 Dashboard</a>
-    <a href="Configuracion.html">⚙️ Configuración</a>
-    <a href="lecturas.html">📋 Historial de Lecturas</a>
-    <a href="alertas.html"> 🔔 Alertas</a>
+    <a href="/">🏠 Dashboard</a>
+        <a href="/configuracion">⚙️ Configuración</a>
+        <a href="/historial-lecturas">📋 Historial de Lecturas</a>
+        <a href="/historial-Alertas "> 🔔 Alertas</a>
     
   </div>
 
+  <!-- Encabezado -->
+    <header class="bg-blue-700 text-white p-6 text-center shadow-md ml-64 rounded-xl">
+      <h1 class="text-4xl font-bold text-gray-300">📋 Historial de Datos</h1>
+    </header>
+
   <!-- Contenido principal -->
   <div class="ml-64 min-h-screen">
-    <!-- Encabezado -->
-    <header class="bg-blue-700 text-white rounded-xl shadow-md py-6 px-4 text-center mb-6">
-      <h1 class="text-3xl font-bold">📋 Historial de Datos</h1>
-    </header>
+    
 
     <main class="max-w-7xl mx-auto mt-8 px-4 pb-10">
       <!-- Filtro por fechas -->
@@ -119,21 +134,21 @@
     window.addEventListener('DOMContentLoaded', () => cargarDatos());
   </script>
 
-  <script src="sketch.js" defer></script>
+  <script src="/sketch.js" defer></script>
 
 
   <script>
   document.addEventListener("DOMContentLoaded", () => {
     const links = document.querySelectorAll(".sidebar a");
-    const currentPage = location.pathname.split("/").pop();
+    const currentPath = window.location.pathname;
 
     links.forEach(link => {
-      const linkPage = link.getAttribute("href");
-      if (linkPage === currentPage) {
-        link.classList.add("active");
-      }
+        if (link.getAttribute("href") === currentPath) {
+            link.classList.add("bg-blue-700", "text-white", "font-bold", "rounded", "px-4", "py-2");
+        }
     });
-  });
+});
+
 </script>
 </body>
 </html>

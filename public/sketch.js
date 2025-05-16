@@ -22,6 +22,7 @@ function setup() {
   // Conectar al socket
   socket = io();
 
+
   socket.on('connect', () => { // Conexión exitosa
     console.log('🟢 Conectado al servidor Socket.IO con ID:', socket.id);
   });
@@ -29,7 +30,7 @@ function setup() {
 
   socket.on('datosSensor', (data) => { // Recibir datos del servidor
 
-    console.log("🔁 Datos recibidos del servidor:", data);
+    //console.log("🔁 Datos recibidos del servidor:", data);
 
     // Verificar errores enviados por el Arduino
     if (data.errorCode === 1) {
@@ -46,16 +47,16 @@ function setup() {
         humedad = data.humedad;
         temperatura = data.temperatura;
         indiceCalor = data.indiceCalor;
-        valorLuz = ((data.valorLuz / 1023) * 100).toFixed(1);
-        humedadSuelo = (((1023 - data.humedadSuelo) / 1023) * 100).toFixed(1);
+        valorLuz = data.valorLuz;
+        humedadSuelo = data.humedadSuelo;
 
 
         // Depuración de datos
         console.log(data.humedad);
         console.log(data.temperatura);
         console.log(data.indiceCalor);
-        console.log(((data.valorLuz / 1023) * 100).toFixed(1));
-        console.log((((1023 - data.humedadSuelo) / 1023) * 100).toFixed(1));
+        console.log(data.valorLuz);
+        console.log(data.humedadSuelo);
 
         let tiempo = new Date().toLocaleTimeString(); // Obtener la hora actual
 
@@ -155,21 +156,19 @@ function setup() {
   });
 }
 
-function mostrarToastError(mensaje) {
-  const contenedor = document.getElementById('toastContainer');
-  if (!contenedor) return;
-
-  const alerta = document.createElement('div');
-  alerta.className = 'toast-alert';
-  alerta.textContent = mensaje;
-
-  contenedor.appendChild(alerta);
-
-  // Eliminar la alerta después de 4 segundos
-  setTimeout(() => {
-    alerta.remove();
-  }, 4000);
+function mostrarToastError(mensaje, color = "#e74c3c") {
+  Toastify({
+    text: mensaje,
+    duration: 4000,
+    gravity: "top", // o "bottom"
+    position: "right", // o "left" o "center"
+    backgroundColor: color,
+    close: true,
+  }).showToast();
 }
+
+
+
 
 
 

@@ -6,16 +6,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Seminario de Redes - Prototipo</title>
 
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="../style.css">
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
 
   <!-- Librerías -->
-  <script src="libraries/p5.min.js"></script>
-  <script src="libraries/p5.sound.min.js"></script>
+  <script src="/libraries/p5.min.js"></script>
+  <script src="/libraries/p5.sound.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
-  <script src="libraries/p5.serialport.js"></script>
+  <script src="/libraries/p5.serialport.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Toastify CSS -->
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+  <!-- Toastify JS -->
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
 
   <!--Estilo para la tabla-->
   <style>
@@ -82,22 +89,22 @@
 <body class="bg-gray-50 text-gray-800 font-sans">
   <!-- Barra de navegación lateral -->
   <div class="sidebar">
-    
+
     <h2 class="text-xl font-semibold text-center text-white mb-6">Menú</h2>
     <label class="text-gray-400 text-sm mt-5 mb-2 pl-2">Navegacion en la aplicacion</label>
-    <a href="index.html">🏠 Dashboard</a>
-    <a href="Configuracion.html">⚙️ Configuración</a>
-    <a href="lecturas.html">📋 Historial de Lecturas</a>
-    <a href="alertas.html"> 🔔 Alertas</a>
+    <a href="/">🏠 Dashboard</a>
+    <a href="/configuracion">⚙️ Configuración</a>
+    <a href="/historial-lecturas">📋 Historial de Lecturas</a>
+    <a href="/historial-Alertas "> 🔔 Alertas</a>
     <label class="text-gray-400 text-sm mt-5 mb-2 pl-2">Navegación Dashboard</label>
     <a href="#informacion-sensores">📡 Información de Sensores</a>
     <a href="#graficas">📊 Gráficas</a>
     <a href="#historial-registros">📋 Últimos Registros</a>
-   
+
   </div>
 
   <!-- Encabezado -->
-  <header class="bg-blue-700 text-white p-6 text-center shadow-md content">
+  <header class="bg-blue-700 text-white p-6 text-center shadow-md content rounded-xl">
     <h1 class="text-4xl font-bold text-gray-300">🌐 Proyecto de Seminario de Redes</h1>
   </header>
 
@@ -166,34 +173,30 @@
   </main>
 
   <!-- Footer -->
-  <footer class="bg-gray-800 text-white p-4 text-center mt-6 pl-[20px]">
+  <footer class="bg-gray-800 text-white p-4 text-center mt-6 ml-64">
     <p>© 2025 Proyecto de Seminario de Redes. Todos los derechos reservados.</p>
     <p>Desarrollado por el equipo de seminario.</p>
   </footer>
 
-  <script src="sketch.js" defer></script>
+
+  <script src="/sketch.js"></script>
+
+
 
   <script>
-  fetch('./componenetes/toast.html')
-    .then(res => res.text())
-    .then(html => {
-      document.body.insertAdjacentHTML('beforeend', html);
-    });
-</script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const links = document.querySelectorAll(".sidebar a");
+      const currentPath = window.location.pathname;
 
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const links = document.querySelectorAll(".sidebar a");
-    const currentPage = location.pathname.split("/").pop();
 
-    links.forEach(link => {
-      const linkPage = link.getAttribute("href");
-      if (linkPage === currentPage) {
-        link.classList.add("active");
-      }
+      links.forEach(link => {
+        if (link.getAttribute("href") === currentPath) {
+          link.classList.add("bg-blue-700", "text-white", "font-bold", "rounded", "px-4", "py-2");
+        }
+      });
     });
-  });
-</script>
+
+  </script>
 
 
 </body>

@@ -45,15 +45,21 @@ function conectarPuerto(io) {
                 const humedadSuelo = paquete.readInt16LE(14);
                 const errorCode = paquete.readInt16LE(16);
 
+                //convertir humedad del suelo a porcentaje donde 0 es el valor maximo y 1023 el minimo
+                //convertir la luz a porcentaje donde 0 es el valor maximo y 1023 el minimo
+                const valorLuzPorcentaje = (valorLuz / 1023) * 100;
+                const humedadSueloPorcentaje = ((1023 - humedadSuelo) / 1023) * 100;
 
-                console.log(`🌡️ Temp: ${temperatura.toFixed(2)}°C | 💧 Hum: ${humedad.toFixed(2)}% | 🥵 Índice: ${indiceCalor.toFixed(2)}°C | 💡 Luz: ${valorLuz} | 🪴 Humedad suelo: ${humedadSuelo} | ❗Error: ${errorCode}`);
+  
+
+                console.log(`🌡️ Temp: ${temperatura.toFixed(2)}°C | 💧 Hum: ${humedad.toFixed(2)}% | 🥵 Índice: ${indiceCalor.toFixed(2)}°C | 💡 Luz: ${valorLuzPorcentaje} | 🪴 Humedad suelo: ${humedadSueloPorcentaje} | ❗Error: ${errorCode}`);
 
                 io.emit('datosSensor', {
                     humedad: humedad.toFixed(2),
                     temperatura: temperatura.toFixed(2),
                     indiceCalor: indiceCalor.toFixed(2),
-                    valorLuz: valorLuz,
-                    humedadSuelo: humedadSuelo,
+                    valorLuz: valorLuzPorcentaje.toFixed(2),
+                    humedadSuelo: humedadSueloPorcentaje.toFixed(2),
                     errorCode: errorCode
                 });
 
@@ -61,7 +67,7 @@ function conectarPuerto(io) {
                 db.run(`
                         INSERT INTO datos_sensores (humedad, temperatura, indice_calor, valor_luz, humedad_suelo)
                         VALUES (?, ?, ?, ?, ?)
-                        `, [humedad, temperatura, indiceCalor, valorLuz, humedadSuelo]
+                        `, [humedad, temperatura, indiceCalor, valorLuzPorcentaje, humedadSueloPorcentaje]
                 );
 
                 // 👉 Guardar alerta si hay error

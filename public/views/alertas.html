@@ -7,16 +7,20 @@
     <title>Alertas</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="style.css">
-
-
+    <link rel="stylesheet" href="../style.css">
 
     <!-- Librerías -->
-    <script src="libraries/p5.min.js"></script>
-    <script src="libraries/p5.sound.min.js"></script>
+    <script src="/libraries/p5.min.js"></script>
+    <script src="/libraries/p5.sound.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
-    <script src="libraries/p5.serialport.js"></script>
+    <script src="/libraries/p5.serialport.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Toastify CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+    <!-- Toastify JS -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
 </head>
 
@@ -24,20 +28,19 @@
     <!-- Barra de navegación lateral -->
 
 
+    <!-- Barra de navegación lateral -->
     <div class="sidebar">
-
         <h2 class="text-xl font-semibold text-center text-white mb-6">Menú</h2>
         <label class="text-gray-400 text-sm mt-5 mb-2 pl-2">Navegacion en la aplicacion</label>
-        <a href="index.html">🏠 Dashboard</a>
-        <a href="Configuracion.html">⚙️ Configuración</a>
-        <a href="lecturas.html">📋 Historial de Lecturas</a>
-        <a href="alertas.html"> 🔔 Alertas</a>
-
+        <a href="/">🏠 Dashboard</a>
+        <a href="/configuracion">⚙️ Configuración</a>
+        <a href="/historial-lecturas">📋 Historial de Lecturas</a>
+        <a href="/historial-Alertas"> 🔔 Alertas</a>
 
     </div>
 
     <!-- Encabezado -->
-    <header class="bg-blue-700 text-white p-6 text-center shadow-md ml-64">
+    <header class="bg-blue-700 text-white p-6 text-center shadow-md ml-64 rounded-xl">
         <h1 class="text-4xl font-bold text-gray-300">🔔 Alertas</h1>
     </header>
 
@@ -149,21 +152,25 @@
     </script>
 
 
-    <script src="sketch.js" defer></script>
+    <script src="/sketch.js"></script>
 
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             const links = document.querySelectorAll(".sidebar a");
-            const currentPage = location.pathname.split("/").pop();
+            const currentPath = window.location.pathname;
+
+            console.log("concuretpath", currentPath);
+            console.log("links", links);
+
 
             links.forEach(link => {
-                const linkPage = link.getAttribute("href");
-                if (linkPage === currentPage) {
-                    link.classList.add("active");
+                if (link.getAttribute("href") === currentPath) {
+                    link.classList.add("bg-blue-700", "text-white", "font-bold", "rounded", "px-4", "py-2");
                 }
             });
         });
+
     </script>
 
 </body>
