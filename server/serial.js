@@ -50,18 +50,10 @@ function conectarPuerto(io) {
                 const valorLuzPorcentaje = (valorLuz / 1023) * 100;
                 const humedadSueloPorcentaje = ((1023 - humedadSuelo) / 1023) * 100;
 
-  
+
 
                 console.log(`🌡️ Temp: ${temperatura.toFixed(2)}°C | 💧 Hum: ${humedad.toFixed(2)}% | 🥵 Índice: ${indiceCalor.toFixed(2)}°C | 💡 Luz: ${valorLuzPorcentaje} | 🪴 Humedad suelo: ${humedadSueloPorcentaje} | ❗Error: ${errorCode}`);
 
-                io.emit('datosSensor', {
-                    humedad: humedad.toFixed(2),
-                    temperatura: temperatura.toFixed(2),
-                    indiceCalor: indiceCalor.toFixed(2),
-                    valorLuz: valorLuzPorcentaje.toFixed(2),
-                    humedadSuelo: humedadSueloPorcentaje.toFixed(2),
-                    errorCode: errorCode
-                });
 
                 // Guardar datos normales
                 db.run(`
@@ -136,8 +128,15 @@ function conectarPuerto(io) {
                             }
                         });
 
-                        // Puedes emitir las alertas al frontend si quieres
-                        io.emit('alertasPlanta', {
+                        // enviar datos al cliente
+
+                        io.emit('datosSensor', {
+                            humedad: humedad.toFixed(2),
+                            temperatura: temperatura.toFixed(2),
+                            indiceCalor: indiceCalor.toFixed(2),
+                            valorLuz: valorLuzPorcentaje.toFixed(2),
+                            humedadSuelo: humedadSueloPorcentaje.toFixed(2),
+                            errorCode: errorCode,
                             planta: planta.nombre,
                             mensajes: alertasGeneradas
                         });

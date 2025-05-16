@@ -32,96 +32,100 @@ function setup() {
 
     //console.log("🔁 Datos recibidos del servidor:", data);
 
+     mostrarToastErrorPlanta("🚨 Alerta " + data.planta + "\n" + data.mensajes);
+    console.log("planta data:",data.planta);
+    console.log("planta mensajes:",data.mensajes);
+
     // Verificar errores enviados por el Arduino
     if (data.errorCode === 1) {
-        mostrarToastError("❌ Error en el sensor de humedad y temperatura. No está enviando datos o está desconectado.");
-        
+      mostrarToastError("❌ Error en el sensor de humedad y temperatura. No está enviando datos o está desconectado.");
+
     } else if (data.errorCode === 2) {
-        mostrarToastError("❌ Error en el sensor de luz. No está dando valores esperados.");
-        
+      mostrarToastError("❌ Error en el sensor de luz. No está dando valores esperados.");
+
     } else if (data.errorCode === 3) {
-        mostrarToastError("❌ Error en el sensor de humedad del suelo. No está dando valores esperados.");
-     
+      mostrarToastError("❌ Error en el sensor de humedad del suelo. No está dando valores esperados.");
+
     } else {
-        // No hay error, procesar los datos recibidos
-        humedad = data.humedad;
-        temperatura = data.temperatura;
-        indiceCalor = data.indiceCalor;
-        valorLuz = data.valorLuz;
-        humedadSuelo = data.humedadSuelo;
+      // No hay error, procesar los datos recibidos
+      humedad = data.humedad;
+      temperatura = data.temperatura;
+      indiceCalor = data.indiceCalor;
+      valorLuz = data.valorLuz;
+      humedadSuelo = data.humedadSuelo;
 
 
-        // Depuración de datos
-        console.log(data.humedad);
-        console.log(data.temperatura);
-        console.log(data.indiceCalor);
-        console.log(data.valorLuz);
-        console.log(data.humedadSuelo);
+      // Depuración de datos
+      console.log(data.humedad);
+      console.log(data.temperatura);
+      console.log(data.indiceCalor);
+      console.log(data.valorLuz);
+      console.log(data.humedadSuelo);
 
-        let tiempo = new Date().toLocaleTimeString(); // Obtener la hora actual
+      let tiempo = new Date().toLocaleTimeString(); // Obtener la hora actual
 
-        // Mostrar en HTML
-        document.getElementById("temperatura").textContent = temperatura;
-        document.getElementById("indiceCalor").textContent = indiceCalor;
-        document.getElementById("humedad").textContent = humedad;
-        document.getElementById("valorLuz").textContent = valorLuz;
-        document.getElementById("humedadSuelo").textContent = humedadSuelo;
-        document.getElementById("ultimaLectura").textContent = tiempo;
+      // Mostrar en HTML
+      document.getElementById("temperatura").textContent = temperatura;
+      document.getElementById("indiceCalor").textContent = indiceCalor;
+      document.getElementById("humedad").textContent = humedad;
+      document.getElementById("valorLuz").textContent = valorLuz;
+      document.getElementById("humedadSuelo").textContent = humedadSuelo;
+      document.getElementById("ultimaLectura").textContent = tiempo;
 
-        // Actualizar datos para la gráfica
-        labels.push(tiempo);
-        tempData.push(parseFloat(temperatura));
-        calorData.push(parseFloat(indiceCalor));
-        humData.push(parseFloat(humedad)); // Agregar la humedad al array correspondiente
-        luzData.push(parseFloat(valorLuz));
-        soilData.push(parseFloat(humedadSuelo));
+      // Actualizar datos para la gráfica
+      labels.push(tiempo);
+      tempData.push(parseFloat(temperatura));
+      calorData.push(parseFloat(indiceCalor));
+      humData.push(parseFloat(humedad)); // Agregar la humedad al array correspondiente
+      luzData.push(parseFloat(valorLuz));
+      soilData.push(parseFloat(humedadSuelo));
 
-        // Limitar a los últimos 10 datos
-        if (labels.length > 10) {
-            labels.shift();
-            tempData.shift();
-            calorData.shift();
-            humData.shift(); // Limitar también el array de humedad
-            luzData.shift(); // Limitar también el array de luz
-            soilData.shift();
-        }
+      // Limitar a los últimos 10 datos
+      if (labels.length > 10) {
+        labels.shift();
+        tempData.shift();
+        calorData.shift();
+        humData.shift(); // Limitar también el array de humedad
+        luzData.shift(); // Limitar también el array de luz
+        soilData.shift();
+      }
 
-        // Calcular el mínimo y máximo de los datasets
-        let todosLosValores = tempData.concat(calorData);
-        let min = Math.min(...todosLosValores);
-        let max = Math.max(...todosLosValores);
+      // Calcular el mínimo y máximo de los datasets
+      let todosLosValores = tempData.concat(calorData);
+      let min = Math.min(...todosLosValores);
+      let max = Math.max(...todosLosValores);
 
-        // Ajustar a múltiplos de 3 hacia abajo y hacia arriba
-        let nuevoMin = Math.floor(min / 3) * 3;
-        let nuevoMax = Math.ceil(max / 3) * 3;
+      // Ajustar a múltiplos de 3 hacia abajo y hacia arriba
+      let nuevoMin = Math.floor(min / 3) * 3;
+      let nuevoMax = Math.ceil(max / 3) * 3;
 
-        // Actualizar el rango del eje Y de la gráfica de temperatura
-        chart.options.scales.y.min = nuevoMin;
-        chart.options.scales.y.max = nuevoMax;
+      // Actualizar el rango del eje Y de la gráfica de temperatura
+      chart.options.scales.y.min = nuevoMin;
+      chart.options.scales.y.max = nuevoMax;
 
-        // Calcular el rango dinámico para la gráfica de humedad
-        let minHum = Math.floor(Math.min(...humData) / 5) * 5;
-        let maxHum = Math.ceil(Math.max(...humData) / 5) * 5;
-        humChart.options.scales.y.min = minHum;
-        humChart.options.scales.y.max = maxHum;
+      // Calcular el rango dinámico para la gráfica de humedad
+      let minHum = Math.floor(Math.min(...humData) / 5) * 5;
+      let maxHum = Math.ceil(Math.max(...humData) / 5) * 5;
+      humChart.options.scales.y.min = minHum;
+      humChart.options.scales.y.max = maxHum;
 
-        // Calcular el rango dinámico para la gráfica de luz
-        let minLuz = Math.floor(Math.min(...luzData) / 10) * 10;
-        let maxLuz = Math.ceil(Math.max(...luzData) / 10) * 10;
-        luzChart.options.scales.y.min = minLuz;
-        luzChart.options.scales.y.max = maxLuz;
+      // Calcular el rango dinámico para la gráfica de luz
+      let minLuz = Math.floor(Math.min(...luzData) / 10) * 10;
+      let maxLuz = Math.ceil(Math.max(...luzData) / 10) * 10;
+      luzChart.options.scales.y.min = minLuz;
+      luzChart.options.scales.y.max = maxLuz;
 
-        luzChart.update();
+      luzChart.update();
 
-        // Actualizar ambas gráficas
-        chart.update();
-        humChart.update();
-        soilChart.update();
-        luzChart.update();
+      // Actualizar ambas gráficas
+      chart.update();
+      humChart.update();
+      soilChart.update();
+      luzChart.update();
 
-        // Agregar fila a la tabla en tiempo real
-        const fila = document.createElement('tr');
-        fila.innerHTML = `
+      // Agregar fila a la tabla en tiempo real
+      const fila = document.createElement('tr');
+      fila.innerHTML = `
           <td>${new Date().toLocaleString()}</td>
           <td>${data.temperatura}</td>
           <td>${data.indiceCalor}</td>
@@ -129,13 +133,13 @@ function setup() {
           <td>${data.valorLuz}</td>
           <td>${data.humedadSuelo}</td>
         `;
-        const tabla = document.getElementById('tablaDatos');
-        tabla.prepend(fila);
+      const tabla = document.getElementById('tablaDatos');
+      tabla.prepend(fila);
 
-        // Limitar la tabla a 50 filas
-        while (tabla.rows.length > 10) {
-          tabla.deleteRow(tabla.rows.length - 1);
-        }
+      // Limitar la tabla a 50 filas
+      while (tabla.rows.length > 10) {
+        tabla.deleteRow(tabla.rows.length - 1);
+      }
     }
   });
 
@@ -147,7 +151,7 @@ function setup() {
   crearGraficaSoil();
 
   // Carga los últimos datos guardados en la BD
-  cargarDatosDesdeBD(); 
+  cargarDatosDesdeBD();
   cargarHistorialAlertas(); // Cargar historial de alertas
 
   //Depuración de errores de socket
@@ -160,17 +164,23 @@ function mostrarToastError(mensaje, color = "#e74c3c") {
   Toastify({
     text: mensaje,
     duration: 4000,
-    gravity: "top", // o "bottom"
+    gravity: "bottom", // o "bottom"
     position: "right", // o "left" o "center"
     backgroundColor: color,
     close: true,
   }).showToast();
 }
 
-
-
-
-
+function mostrarToastErrorPlanta(mensaje, color = "#63d76e") {
+  Toastify({
+    text: mensaje,
+    duration: 4000,
+    gravity: "bottom", // o "bottom"
+    position: "right", // o "left" o "center"
+    backgroundColor: color,
+    close: true,
+  }).showToast();
+}
 
 
 function cargarDatosDesdeBD() {
@@ -213,7 +223,7 @@ function cargarDatosDesdeBD() {
       }
 
       // Asignar explícitamente los datos a las gráficas
-      chart.data.labels = labels; 
+      chart.data.labels = labels;
       chart.data.datasets[0].data = tempData;
       chart.data.datasets[1].data = calorData;
 
@@ -434,7 +444,7 @@ function crearGraficaLuz() {
 
 function crearGraficaSoil() {
   const ctx = document.getElementById('graficaSoil').getContext('2d');
-  
+
   soilChart = new Chart(ctx, {
     type: 'line',
     data: {
