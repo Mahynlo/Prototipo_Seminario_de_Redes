@@ -4,6 +4,8 @@ const socketIo = require('socket.io');
 const http = require('http');
 const path = require('path');
 
+require('dotenv').config();
+
 // db/sensorData.js
 const db = require('../db/database');
 // 👉 Importar conectarPuerto
@@ -18,6 +20,8 @@ const io = socketIo(server);
 // Cors
 const cors = require('cors');
 
+const { iniciarNotificaciones } = require('./mail');
+iniciarNotificaciones();
 
 
 // configuración de middleware
@@ -58,6 +62,7 @@ app.get('/historial-alertas', (req, res) => { // Ruta para el historial
 app.get('/historial-lecturas', (req, res) => { // Ruta para el historial de lect
   res.sendFile(path.join(__dirname, '../public/views/lecturas.html')); // Enviar el archivo HTML del historial de lecturas
 });
+
 
 
 

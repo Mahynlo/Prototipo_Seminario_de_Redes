@@ -1,9 +1,9 @@
 // server/Serial.js
 const { SerialPort } = require('serialport');
-// db/sensorData.js
 const db = require('../db/database');
+const mail = require('./mail'); // Importamos el módulo de correo
 
-const SERIAL_PATH = 'COM5'; // ⚠️ Asegúrate de que este sea tu puerto
+const SERIAL_PATH = 'COM15'; // ⚠️ Asegúrate de que este sea tu puerto
 //const SERIAL_PATH = '/dev/ttyUSB0'; //⚠️ puerto en linux
 const BAUD_RATE = 9600;
 
@@ -24,7 +24,6 @@ function conectarPuerto(io) {
         if (err) {
             console.error('❌ No se pudo abrir el puerto:', err.message);
             return reintentarConexion(io);
-
         }
         console.log('✅ Puerto serie abierto en', SERIAL_PATH);
     });
@@ -45,57 +44,53 @@ function conectarPuerto(io) {
                 const humedadSuelo = paquete.readInt16LE(14);
                 const errorCode = paquete.readInt16LE(16);
 
-                //convertir humedad del suelo a porcentaje donde 0 es el valor maximo y 1023 el minimo
-                //convertir la luz a porcentaje donde 0 es el valor maximo y 1023 el minimo
                 const valorLuzPorcentaje = (valorLuz / 1023) * 100;
                 const humedadSueloPorcentaje = ((1023 - humedadSuelo) / 1023) * 100;
 
-
-
                 console.log(`🌡️ Temp: ${temperatura.toFixed(2)}°C | 💧 Hum: ${humedad.toFixed(2)}% | 🥵 Índice: ${indiceCalor.toFixed(2)}°C | 💡 Luz: ${valorLuzPorcentaje} | 🪴 Humedad suelo: ${humedadSueloPorcentaje} | ❗Error: ${errorCode}`);
 
-
                 // Guardar datos normales
-                db.run(`
-                        INSERT INTO datos_sensores (humedad, temperatura, indice_calor, valor_luz, humedad_suelo)
-                        VALUES (?, ?, ?, ?, ?)
-                        `, [humedad, temperatura, indiceCalor, valorLuzPorcentaje, humedadSueloPorcentaje]
+                db.run(
+                    `INSERT INTO datos_sensores (humedad, temperatura, indice_calor, valor_luz, humedad_suelo)
+                     VALUES (?, ?, ?, ?, ?)`,
+                    [humedad, temperatura, indiceCalor, valorLuzPorcentaje, humedadSueloPorcentaje]
                 );
 
-                // 👉 Guardar alerta si hay error
+                // Procesar alertas de Arduino
                 if (errorCode !== 0) {
-                    //si es 1 es el sensor de humedad y temperatura
-                    //si es 2 es el sensor de humedad del luz
-                    //si es 3 es el sensor de humedad del suelo
-
                     let errorcodeInterpretado = 'Error desconocido';
+                    let sensor = 'Desconocido';
 
                     if (errorCode === 1) {
                         errorcodeInterpretado = 'Error en el sensor de humedad y temperatura';
+                        sensor = 'Sensor de humedad y temperatura';
                     } else if (errorCode === 2) {
                         errorcodeInterpretado = 'Error en el sensor de humedad de luz';
+                        sensor = 'Sensor de humedad de luz';
                     } else if (errorCode === 3) {
                         errorcodeInterpretado = 'Error en el sensor de humedad del suelo';
+                        sensor = 'Sensor de humedad del suelo';
                     }
 
-                    const sensor = errorCode === 1 ? 'Sensor de humedad y temperatura' :
-                        errorCode === 2 ? 'Sensor de humedad del luz' :
-                            errorCode === 3 ? 'Sensor de humedad del suelo' : 'Desconocido';
                     const mensaje = `${errorcodeInterpretado} - Código de error: ${errorCode}`;
 
-                    db.run(`
-                        INSERT INTO alertasArduino (sensor, mensaje)
-                        VALUES (?, ?)
-                    `, [sensor, mensaje], (err) => {
-                        if (err) {
-                            console.error('❌ Error al guardar la alerta:', err.message);
-                        } else {
-                            console.log('⚠️ Alerta guardada en la base de datos');
+                    db.run(
+                        `INSERT INTO alertasArduino (sensor, mensaje)
+                         VALUES (?, ?)`,
+                        [sensor, mensaje],
+                        (err) => {
+                            if (err) {
+                                console.error('❌ Error al guardar la alerta:', err.message);
+                            } else {
+                                console.log('⚠️ Alerta guardada en la base de datos');
+                                // Agregar al sistema de notificaciones por correo
+                                mail.agregarAlerta(`Error en sensor: ${errorcodeInterpretado}`);
+                            }
                         }
-                    });
+                    );
                 }
 
-                // Obtener planta activa (por ahora simplemente la última insertada)
+                // Obtener planta activa y generar alertas
                 db.get(`SELECT * FROM plantas ORDER BY id DESC LIMIT 1`, (err, planta) => {
                     if (err) {
                         console.error('❌ Error al obtener planta:', err.message);
@@ -109,28 +104,32 @@ function conectarPuerto(io) {
                     const lectura = {
                         humedad: humedad,
                         temperatura: temperatura,
-                        humedad_suelo:humedadSueloPorcentaje ,
+                        humedad_suelo: humedadSueloPorcentaje,
                         luz: valorLuzPorcentaje
                     };
 
                     const alertasGeneradas = generarAlertas(lectura, planta);
 
-
                     if (alertasGeneradas.length > 0) {
                         const mensajes = alertasGeneradas.join(' | ');
-                        db.run(`
-                            INSERT INTO alertasPlanta (planta, fecha, mensajes)
-                            VALUES (?, datetime('now'), ?)
-                            `, [planta.nombre, mensajes], (err) => {
-                            if (err) {
-                                console.error('❌ Error al guardar alertas de planta:', err.message);
-                            } else {
-                                console.log('⚠️ Alerta de planta registrada:', mensajes);
+                        db.run(
+                            `INSERT INTO alertasPlanta (planta, fecha, mensajes)
+                             VALUES (?, datetime('now'), ?)`,
+                            [planta.nombre, mensajes],
+                            (err) => {
+                                if (err) {
+                                    console.error('❌ Error al guardar alertas de planta:', err.message);
+                                } else {
+                                    console.log('⚠️ Alerta de planta registrada:', mensajes);
+                                    // Agregar todas las alertas al sistema de notificaciones
+                                    alertasGeneradas.forEach(alerta => {
+                                        mail.agregarAlerta(`${planta.nombre}: ${alerta}`);
+                                    });
+                                }
                             }
-                        });
+                        );
 
-                        // enviar datos al cliente
-
+                        // Enviar datos al cliente
                         io.emit('datosSensor', {
                             humedad: humedad.toFixed(2),
                             temperatura: temperatura.toFixed(2),
@@ -144,48 +143,36 @@ function conectarPuerto(io) {
                     }
                 });
 
-
             } catch (error) {
                 console.error('❌ Error procesando paquete:', error.message);
             }
-
-
         }
-
     });
 
-
-
-    mySerialPort.on('close', () => { // Evento de cierre del puerto serie
+    mySerialPort.on('close', () => {
         console.warn('⚠️ Puerto serie cerrado. Intentando reconectar...');
         reintentarConexion(io);
-
     });
 
-    mySerialPort.on('error', (err) => { // Evento de error del puerto serie 
+    mySerialPort.on('error', (err) => {
         console.error('❌ Error en el puerto serie:', err.message);
         reintentarConexion(io);
-
     });
 }
 
-function reintentarConexion(io) { // Función para reintentar la conexión al puerto serie
+function reintentarConexion(io) {
     if (reconectando) return;
     reconectando = true;
 
     setTimeout(() => {
         console.log('🔁 Intentando reconectar al puerto serial...');
         reconectando = false;
-        conectarPuerto(io); // ✅ Pasa io de nuevo
+        conectarPuerto(io);
     }, 3000);
 }
 
-
 function generarAlertas(lectura, planta) {
     const alertas = [];
-
-    //console.log('📦 Paquete recibido:', lectura);
-    //console.log('🌱 Planta:', planta);
 
     if (lectura.humedad < planta.humedad_min)
         alertas.push('⚠️ Humedad del aire demasiado baja.');
@@ -204,16 +191,13 @@ function generarAlertas(lectura, planta) {
 
     if (planta.nivel_luz === 'sombra' && lectura.luz > (34/1023) * 100)
         alertas.push('🌞 Demasiada luz para una planta de sombra.');
-    if (planta.nivel_luz === 'indirecta' && (lectura.luz < ((341/1023)*100) || lectura.luz > ((682/1023)*100) ))
+    if (planta.nivel_luz === 'indirecta' && (lectura.luz < ((341/1023)*100) || lectura.luz > ((682/1023)*100)))
         alertas.push('🌥️ Luz no adecuada para esta planta.');
     if (planta.nivel_luz === 'directa' && lectura.luz < ((683/1023)*100))
         alertas.push('☀️ Falta luz directa.');
 
     return alertas;
 }
-
-
-
 
 module.exports = {
     conectarPuerto,

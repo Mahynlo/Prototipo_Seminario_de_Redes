@@ -161,6 +161,7 @@ router.post('/plantas', (req, res) => {
 });
 
 
+
 //HACER FETCH A LA ULTIMA FILA
 router.get('/plantas/ultima', (req, res) => {
   db.get('SELECT * FROM plantas ORDER BY id DESC LIMIT 1', (err, row) => {
@@ -174,6 +175,54 @@ router.get('/plantas/ultima', (req, res) => {
     res.json(row);
   });
 });
+
+// POST /alertas_correo → guardar nueva configuración de correo
+router.post('/alertas_correo', (req, res) => {
+  const { correo, intervalo_horas } = req.body;
+
+  if (!correo || isNaN(intervalo_horas)) {
+    return res.status(400).json({ error: 'Correo e intervalo válidos son requeridos' });
+  }
+
+  const query = `
+    INSERT INTO alertas_correo (correo, intervalo_horas)
+    VALUES (?, ?)
+  `;
+
+  db.run(query, [correo, parseFloat(intervalo_horas)], function (err) {
+    if (err) {
+      console.error('❌ Error al guardar configuración de correo:', err.message);
+      return res.status(500).json({ error: 'Error al guardar la configuración' });
+    }
+
+    console.log(`✅ Configuración de correo guardada con ID ${this.lastID}`);
+    res.status(201).json({ mensaje: 'Configuración guardada correctamente', id: this.lastID });
+  });
+});
+
+// GET /alertas_correo → obtener la última configuración de correo
+router.get('/alertas_correo', (req, res) => {
+  const query = `
+    SELECT correo, intervalo_horas
+    FROM alertas_correo
+    ORDER BY id DESC
+    LIMIT 1
+  `;
+
+  db.get(query, [], (err, row) => {
+    if (err) {
+      console.error('❌ Error al obtener configuración de correo:', err.message);
+      return res.status(500).json({ error: 'Error al consultar la base de datos' });
+    }
+
+    if (!row) {
+      return res.status(404).json({ mensaje: 'No hay configuración de correo registrada' });
+    }
+
+    res.status(200).json(row);
+  });
+});
+
 
 
 //exportar las rutas

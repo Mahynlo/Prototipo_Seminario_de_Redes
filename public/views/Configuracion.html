@@ -133,17 +133,31 @@
       <form id="formCorreo" class="space-y-4">
         <div>
           <label class="block text-sm font-medium text-gray-700">Correo electrónico</label>
-          <input type="email" name="correo" required placeholder="Ej."
+          <input type="email" id="correo" name="correo" required placeholder="Ej. ejemplo@correo.com"
             class="mt-1 w-full rounded-lg border border-gray-300 p-2 focus:ring-2 focus:ring-blue-500" />
         </div>
+
         <div>
-          <label class="block text-sm font-medium text-gray-700">Cada cuanto se envia un correo</label>
-          <input type="number" name="intervalo" required placeholder="Ej. 5"
-            class="mt-1 w-full rounded-lg border border-gray-300 p-2 focus:ring-2 focus:ring-blue-500" />
+          <label class="block text-sm font-medium text-gray-700">Intervalo de envío de correos</label>
+          <select id="intervalo_horas" name="intervalo_horas" required
+            class="mt-1 w-full rounded-lg border border-gray-300 p-2 focus:ring-2 focus:ring-blue-500">
+            <option value="">Seleccione un intervalo</option>
+            <option value="1">1 hora</option>
+            <option value="2">2 horas</option>
+            <option value="3">3 horas</option>
+            <option value="4">4 horas</option>
+            <option value="5">5 horas</option>
+            <option value="6">6 horas</option>
+            <option value="12">12 horas</option>
+            <option value="24">24 horas</option>
+            <option value="48">48 horas</option>
+            <option value="72">72 horas</option>
+          </select>
         </div>
 
-
-
+        <button type="submit"
+          class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">Guardar configuración</button>
+      </form>
     </section>
   </main>
 
@@ -197,6 +211,52 @@
       }
     });
   </script>
+  
+  <script>
+  document.getElementById('formCorreo').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+
+    const response = await fetch('/api/alertas_correo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+
+    if (response.ok) {
+      alert('✔️ Configuración guardada correctamente');
+      e.target.reset();
+    } else {
+      const err = await response.json();
+      alert('❌ Error al guardar configuración: ' + err.error);
+    }
+  });
+</script>
+
+<script>
+  async function cargarConfiguracionCorreo() {
+    try {
+      const res = await fetch('/api/alertas_correo');
+      if (!res.ok) throw new Error('No se encontró configuración previa');
+      const config = await res.json();
+
+      document.getElementById('correo').value = config.correo;
+      document.getElementById('intervalo_horas').value = config.intervalo_horas;
+    } catch (err) {
+      console.warn('ℹ️ No hay configuración de correo previa:', err.message);
+    }
+  }
+
+  // Llamar junto con cargarUltimaPlanta
+  window.addEventListener('DOMContentLoaded', () => {
+    cargarUltimaPlanta();
+    cargarConfiguracionCorreo();
+  });
+</script>
+
+
 
 
 </body>

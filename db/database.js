@@ -58,8 +58,27 @@ db.run(`
   fecha TEXT,
   mensajes TEXT
 );
-
 `);
+
+db.run(`
+  CREATE TABLE  IF NOT EXISTS alertasPlanta(
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  planta TEXT,
+  fecha TEXT,
+  mensajes TEXT
+);
+`);
+
+// Crear tabla de configuración de alertas si no existe
+db.run(`
+  CREATE TABLE IF NOT EXISTS alertas_correo (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    correo TEXT NOT NULL,
+    intervalo_horas INTEGER NOT NULL,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
+`);
+
 
 module.exports = db;
 
